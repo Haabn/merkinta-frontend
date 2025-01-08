@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tunnistautuminen</title>
+    <link rel="stylesheet" href="styles4.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/forge/0.10.0/forge.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Tunnistautuminen</h1>
+        <form id="authForm">
+            <div class="info-box">
+                <p>Tehdäksesi merkinnän, sinun tulee ensin tunnistautua pankkitunnuksilla.</p>
+                <div id="errorMessage" style="display: none;" class="error-message">
+                    Tunnistautuminen epäonnistui. Ole hyvä ja yritä uudelleen.
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Aloita tunnistautuminen pankkitunnuksilla:</label>
+                <button type="button" id="startAuth" class="submit">
+                    Tunnistaudu pankkitunnuksilla
+                </button>
+            </div>
+        </form>
+    </div>
+    <script src="merkinta.js"></script>
+</body>
+</html>

@@ -1,0 +1,206 @@
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap');
+
+body {
+    font-family: 'Raleway', sans-serif;
+    color: #333;
+    background-color: #f0ece3;
+    margin: 0;
+    padding-top: 10vh;
+}
+
+.container {
+    max-width: 700px;
+    width: 90%;
+    margin: 0 auto;
+}
+
+h1 {
+    text-align: center;
+    color: #00509e;
+    margin-bottom: 30px;
+}
+
+form {
+    background-color: #ffffff;
+    padding: 30px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-group > label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+/* Radio buttons styling */
+.radio-group {
+    display: flex; /* Use flexbox to align elements */
+    align-items: center; /* Align items vertically */
+    gap: 10px; /* Space between buttons and labels */
+}
+
+.radio-group input[type="radio"] {
+    margin: 0;
+    display: inline-block; /* Ensure the radio button stays inline */
+}
+
+.radio-group label {
+    display: inline-block;
+    margin: 0;
+    vertical-align: middle;
+}
+
+
+/* Text inputs */
+input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+/* Number input with thousand separator */
+input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 16px;
+    text-align: right;
+}
+
+/* Remove spinner arrows from number input */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Info box styling */
+.info-box {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    padding: 15px;
+    margin: 20px 0;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Error message */
+.error-message {
+    color: #dc3545;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+/* Submit button */
+button[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    background-color: #00509e;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+button[type="submit"]:hover {
+    background-color: #003f87;
+}
+
+button[type="submit"]:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+/* Thank you message for "Ei" response */
+#kiitosViesti_Ei {
+    text-align: center;
+    padding: 20px;
+    background-color: #d4edda;      /* Light green background */
+    border: 1px solid #c3e6cb;
+    border-radius: 4px;
+    color: #155724;                 /* Dark green text */
+    margin: 20px 0;
+}
+
+/* Thank you message for completed form */
+#kiitosViesti_Valmis {
+    text-align: center;
+    padding: 20px;
+    background-color: #cce5ff;      /* Light blue background */
+    border: 1px solid #b8daff;
+    border-radius: 4px;
+    color: #004085;                 /* Dark blue text */
+    margin: 20px 0;
+}
+
+/* Hidden elements */
+[style*="display: none"] {
+    display: none !important;
+}
+/* Existing styles remain the same */
+
+/* Error States */
+input.error,
+textarea.error {
+    border-color: #dc3545;
+    background-color: #fff8f8;
+}
+
+input.error:focus,
+textarea.error:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    outline: none;
+}
+
+.radio-group.error {
+    padding: 10px;
+    border: 1px solid #dc3545;
+    border-radius: 4px;
+    background-color: #fff8f8;
+}
+
+/* Error Message Styling */
+.error-message {
+    color: #dc3545;
+    font-size: 0.875em;
+    margin-top: 5px;
+    display: block;
+}
+
+/* Required Field Indicator */
+label.required::after {
+    content: " *";
+    color: #dc3545;
+}
+
+/* Visual feedback for invalid fields */
+input:invalid,
+textarea:invalid {
+    border-color: #dc3545;
+}
+
+/* Animation for error state */
+@keyframes errorShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.error {
+    animation: errorShake 0.4s ease-in-out;
+}
