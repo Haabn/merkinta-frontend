@@ -16,13 +16,15 @@ window.addEventListener('error', function (e) {
         e.preventDefault();
     }
  });
- 
+
+const apiUrl = import.meta.env.VITE_API_URL;
+
  // Bank Authentication Handling
- const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/verify-session`, {
+async function verifySession(token) {
+    try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/verify-session`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ token })
         });
  
@@ -111,7 +113,7 @@ window.addEventListener('error', function (e) {
     const formDataObj = Object.fromEntries(formData.entries());
     const encryptedData = encryptDataForTransmission(formDataObj);
  
-    const response = await fetch(`${apiUrl}/merkinta/decrypt`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/merkinta/decrypt`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -129,7 +131,7 @@ window.addEventListener('error', function (e) {
  }
  
  async function checkDatabase(payload) {
-    const response = await fetch(`${apiUrl}/merkinta/check-info`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/merkinta/check-info`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -351,3 +353,15 @@ window.addEventListener('error', function (e) {
        });
    }
 }
+// Initialize
+document.addEventListener('DOMContentLoaded', function () {
+    const currentPage = window.location.pathname.split('/').pop();
+
+    if (currentPage === 'index.html' || currentPage === '') {
+        handleBankAuth();
+    } else if (currentPage === 'merkinta.html') {
+        handleMerkintaForm();
+    } else if (currentPage === 'merkinta2.html') {
+        handleMerkinta2Form();
+    }
+});
