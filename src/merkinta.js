@@ -18,11 +18,11 @@ window.addEventListener('error', function (e) {
  });
  
  // Bank Authentication Handling
- async function verifySession(token) {
-    try {
-        const response = await fetch('https://sopimus.chatasilo.com/auth/verify-session', {
+ const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/verify-session`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify({ token })
         });
  
@@ -39,17 +39,17 @@ window.addEventListener('error', function (e) {
     const authButton = document.getElementById('startAuth');
     if (authButton) {
         authButton.addEventListener('click', async function () {
-            try {
-                const response = await fetch('https://sopimus.chatasilo.com/auth/session', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Accept: 'application/json'
-                    },
-                    body: JSON.stringify({}),
-                    mode: 'cors',
-                    credentials: 'include'
-                });
+           try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/session`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({}),
+            mode: 'cors',
+            credentials: 'include'
+        });
  
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
@@ -111,15 +111,15 @@ window.addEventListener('error', function (e) {
     const formDataObj = Object.fromEntries(formData.entries());
     const encryptedData = encryptDataForTransmission(formDataObj);
  
-    const response = await fetch('https://sopimus.chatasilo.com/merkinta/decrypt', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify(encryptedData)
-    });
+    const response = await fetch(`${apiUrl}/merkinta/decrypt`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            credentials: 'include', // Include credentials like cookies
+            body: JSON.stringify(encryptedData)
+        });
  
     if (!response.ok) {
         throw new Error('Backend request failed');
@@ -129,16 +129,16 @@ window.addEventListener('error', function (e) {
  }
  
  async function checkDatabase(payload) {
-    const response = await fetch('https://sopimus.chatasilo.com/merkinta/check-info', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json'
-        },
-        credentials: 'include',
-        mode: 'cors',
-        body: JSON.stringify(payload)
-    });
+    const response = await fetch(`${apiUrl}/merkinta/check-info`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            credentials: 'include', // Include credentials like cookies
+            mode: 'cors', // Enable Cross-Origin Resource Sharing
+            body: JSON.stringify(payload)
+        });
  
     if (!response.ok) {
         throw new Error('Database check failed');
