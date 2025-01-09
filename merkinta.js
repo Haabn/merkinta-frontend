@@ -240,79 +240,114 @@ window.addEventListener('error', function (e) {
  
  // Handle merkinta2.html Form
  function handleMerkinta2Form() {
-    const storedData = JSON.parse(sessionStorage.getItem('merkintaData') || '{}');
-    if (!storedData.formData) {
-        window.location.href = 'merkinta.html';
-        return;
-    }
- 
-    const { formData, databaseCheck } = storedData;
-    const elements = {
-        form: document.getElementById('merkintaForm2'),
-        childAdditionalInfoContainer: document.getElementById('childAdditionalInfoContainer'),
-        businessAdditionalInfoContainer: document.getElementById('additionalInfoContainer'),
-        selfAdditionalInfoContainer: document.getElementById('selfAdditionalInfoContainer')
-    };
- 
-    // Show/hide additional info based on database check
-    if (databaseCheck) {
-        if (formData.investmentType === 'self') {
-            elements.selfAdditionalInfoContainer.style.display = 
-                databaseCheck.found ? 'none' : 'block';
-        } else if (formData.investmentType === 'child') {
-            elements.childAdditionalInfoContainer.style.display = 
-                databaseCheck.found ? 'none' : 'block';
-        } else if (formData.investmentType === 'business') {
-            elements.businessAdditionalInfoContainer.style.display = 
-                databaseCheck.found ? 'none' : 'block';
-        }
-    }
- 
-    if (elements.form) {
-        elements.form.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            try {
-                const response = await submitFormData(new FormData(this));
-                if (response.status === 'success') {
-                    sessionStorage.removeItem('merkintaData');
-                    window.location.href = 'page12.html';
-                } else {
-                    throw new Error(response.message || 'Submission failed');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Virhe lomakkeen lähetyksessä: ' + error.message);
-            }
-        });
-    }
- }
- 
- // Session Cleanup
- window.addEventListener('beforeunload', async () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('auth_data')) {
-        try {
-            const authData = JSON.parse(atob(urlParams.get('auth_data')));
-            await fetch('https://sopimus.chatasilo.com/auth/clear-session', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token: authData.sessionToken })
-            });
-        } catch (error) {
-            console.error('Error clearing session:', error);
-        }
-    }
- });
- 
- // Initialize
- document.addEventListener('DOMContentLoaded', function () {
-    const currentPage = window.location.pathname.split('/').pop();
- 
-    if (currentPage === 'index.html' || currentPage === '') {
-        handleBankAuth();
-    } else if (currentPage === 'merkinta.html') {
-        handleMerkintaForm();
-    } else if (currentPage === 'merkinta2.html') {
-        handleMerkinta2Form();
-    }
- });
+   const storedData = JSON.parse(sessionStorage.getItem('merkintaData') || '{}');
+   if (!storedData.formData) {
+       window.location.href = 'merkinta.html';
+       return;
+   }
+
+   const { formData, databaseCheck, authData } = storedData;
+   const investmentType = formData.investmentType;
+
+   const elements = {
+       form: document.getElementById('merkintaForm2'),
+       childAdditionalInfoContainer: document.getElementById('childAdditionalInfoContainer'),
+       businessAdditionalInfoContainer: document.getElementById('additionalInfoContainer'),
+       selfAdditionalInfoContainer: document.getElementById('selfAdditionalInfoContainer'),
+       id3rRadios: document.getElementsByName('id3r'),
+       id3Container: document.getElementById('id3Container'),
+       merkintaSumma: document.getElementById('merkintaSumma'),
+       summaError: document.getElementById('summaError')
+   };
+
+   // Show/hide additional info based on database check
+   if (databaseCheck) {
+       if (investmentType === 'self') {
+           elements.selfAdditionalInfoContainer.style.display = 
+               databaseCheck.found ? 'none' : 'block';
+           // If found, populate hidden fields with database data
+           if (databaseCheck.found && databaseCheck.data) {
+               Object.keys(databaseCheck.data).forEach(key => {
+                   const input = document.querySelector(`input[name="${key}"]`);
+                   if (input) input.value = databaseCheck.data[key];
+               });
+           }
+       } else if (investmentType === 'child') {
+           elements.childAdditionalInfoContainer.style.display = 
+               databaseCheck.found ? 'none' : 'block';
+           if (databaseCheck.found && databaseCheck.data) {
+               Object.keys(databaseCheck.data).forEach(key => {
+                   const input = document.querySelector(`input[name="${key}"]`);
+                   if (input) input.value = databaseCheck.data[key];
+               });
+           }
+       } else if (investmentType === 'business') {
+           elements.businessAdditionalInfoContainer.style.display = 
+               databaseCheck.found ? 'none' : 'block';
+           if (databaseCheck.found && databaseCheck.data) {
+               Object.keys(databaseCheck.data).forEach(key => {
+                   const input = document.querySelector(`input[name="${key}"]`);
+                   if (input) input.value = databaseCheck.data[key];
+               });
+           }
+       }
+   }
+
+   // Handle additional account ownership info visibility
+   if (elements.id3rRadios) {
+       elements.id3rRadios.forEach(radio => {
+           radio.addEventListener('change', function() {
+               elements.id3Container.style.display = 
+                   this.value === 'joo' ? 'block' : 'none';
+           });
+       });
+   }
+
+   // Handle form submission
+   if (elements.form) {
+       elements.form.addEventListener('submit', async function(e) {
+           e.preventDefault();
+
+           // Validate merkintä amount
+           const amount = parseFloat(elements.merkintaSumma.value);
+           if (Math.abs(amount) < 1000) {
+               elements.summaError.style.display = 'block';
+               return;
+           }
+
+           try {
+               // Create final form data
+               const finalFormData = new FormData(this);
+
+               // Add investment type
+               finalFormData.append('investmentType', investmentType);
+
+               // Add auth data if it's a self investment
+               if (investmentType === 'self' && authData) {
+                   finalFormData.append('nationalIdentityNumber', authData.nationalIdentityNumber);
+                   finalFormData.append('name', authData.name);
+               }
+
+               // Add database data if found
+               if (databaseCheck?.found && databaseCheck.data) {
+                   Object.entries(databaseCheck.data).forEach(([key, value]) => {
+                       if (!finalFormData.has(key)) {
+                           finalFormData.append(key, value);
+                       }
+                   });
+               }
+
+               const response = await submitFormData(finalFormData);
+               if (response.status === 'success') {
+                   sessionStorage.removeItem('merkintaData');
+                   window.location.href = 'page12.html';
+               } else {
+                   throw new Error(response.message || 'Submission failed');
+               }
+           } catch (error) {
+               console.error('Error:', error);
+               alert('Virhe lomakkeen lähetyksessä: ' + error.message);
+           }
+       });
+   }
+}
