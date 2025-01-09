@@ -11,28 +11,115 @@
         <h1>Merkintälomake</h1>
         
         <form id="merkintaForm2">
+            <!-- Self additional info container -->
+            <div id="selfAdditionalInfoContainer" class="form-group" style="display: none;">
+                <h4>Lisätiedot</h4>
+                <div class="form-group">
+                    <label for="selfAddress">Osoite:</label>
+                    <input type="text" id="selfAddress" name="Adress" class="form-control"/>
+                </div>
+                <div class="form-group">
+                    <label for="selfPostal">Postinumero:</label>
+                    <input type="text" id="selfPostal" name="postinumero" class="form-control"/>
+                </div>
+                <div class="form-group">
+                    <label for="selfCity">Postitoimipaikka:</label>
+                    <input type="text" id="selfCity" name="postitoimipaikka" class="form-control"/>
+                </div>
+                <div class="form-group">
+                    <label for="selfBankAccount">Pankkitilin numero ja valuutta:</label>
+                    <input type="text" id="selfBankAccount" name="tilinumero" class="form-control"/>
+                </div>
+                <div class="form-group">
+                    <label for="selfBankBIC">Pankin nimi ja BIC:</label>
+                    <input type="text" id="selfBankBIC" name="nimibic" class="form-control"/>
+                </div>
+                <div class="form-group">
+                    <label for="selfPhone">Puhelinnumero:</label>
+                    <input type="text" id="selfPhone" name="puh" class="form-control"/>
+                </div>
+                <div class="form-group">
+                    <label for="selfEmail">Sähköposti:</label>
+                    <input type="email" id="selfEmail" name="email" class="form-control"/>
+                </div>
+            </div>
+
             <!-- Child additional info container -->
             <div id="childAdditionalInfoContainer" class="form-group" style="display: none;">
                 <h4>Lapsen tiedot</h4>
-                <!-- Child info fields -->
                 <div class="form-group">
                     <label for="childName">Lapsen nimi:</label>
                     <input type="text" id="childName" name="Name1" class="form-control"/>
                 </div>
-                
-                <!-- ... rest of child fields ... -->
+                <div class="form-group">
+                    <label for="childSSN">Lapsen henkilötunnus:</label>
+                    <input type="text" id="childSSN" name="ID" class="form-control"/>
+                </div>
+                <div class="form-group">
+                    <label for="childNationality">Lapsen kansalaisuus:</label>
+                    <input type="text" id="childNationality" name="kansalaisuus" class="form-control"/>
+                </div>
+                <div class="form-group">
+                    <label for="childAddress">Lapsen osoite:</label>
+                    <input type="text" id="childAddress" name="Adress" class="form-control"/>
+                </div>
+                <div class="form-group">
+                    <label for="childPostal">Postinumero:</label>
+                    <input type="text" id="childPostal" name="postinumero" class="form-control"/>
+                </div>
+                <div class="form-group">
+                    <label for="childCity">Postitoimipaikka:</label>
+                    <input type="text" id="childCity" name="postitoimipaikka" class="form-control"/>
+                </div>
+                <div class="form-group">
+                    <label for="childBankAccount">Pankkitilin numero ja valuutta:</label>
+                    <input type="text" id="childBankAccount" name="tilinumero" class="form-control"/>
+                </div>
+                <div class="form-group">
+                    <label for="childBankBIC">Pankin nimi ja BIC:</label>
+                    <input type="text" id="childBankBIC" name="nimibic" class="form-control"/>
+                </div>
+                <div class="form-group">
+                    <label for="childPhone">Puhelinnumero:</label>
+                    <input type="text" id="childPhone" name="puh" class="form-control"/>
+                </div>
+                <div class="form-group">
+                    <label for="childEmail">Sähköposti:</label>
+                    <input type="email" id="childEmail" name="email" class="form-control"/>
+                </div>
             </div>
             
             <!-- Business additional info container -->
             <div id="additionalInfoContainer" class="form-group" style="display: none;">
-                <h4>Lisätiedot</h4>
-                <!-- Business info fields -->
+                <h4>Yrityksen tiedot</h4>
                 <div class="form-group">
-                    <label for="additionalName">Yrityksen nimi:</label>
-                    <input type="text" id="additionalName" name="yhtionimi" class="form-control">
+                    <label for="companyName">Yrityksen nimi:</label>
+                    <input type="text" id="companyName" name="yhtionimi" class="form-control">
                 </div>
-                
-                <!-- ... rest of business fields ... -->
+                <div class="form-group">
+                    <label for="companyCountry">Rekisteröintimaa:</label>
+                    <input type="text" id="companyCountry" name="rekisterimaa" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="companyAddress">Yrityksen osoite:</label>
+                    <input type="text" id="companyAddress" name="reg_osoite" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="companyBankAccount">Pankkitilin numero ja valuutta:</label>
+                    <input type="text" id="companyBankAccount" name="tilinumero" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="companyBankBIC">Pankin nimi ja BIC:</label>
+                    <input type="text" id="companyBankBIC" name="nimibic" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="companyRepPhone">Edustajan puhelinnumero:</label>
+                    <input type="text" id="companyRepPhone" name="puh_edustaja" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="companyRepEmail">Edustajan sähköposti:</label>
+                    <input type="email" id="companyRepEmail" name="email_edustaja" class="form-control">
+                </div>
             </div>
 
             <!-- Account age question -->
