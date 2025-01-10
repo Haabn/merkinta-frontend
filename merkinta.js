@@ -2,7 +2,7 @@
 * merkinta.js
 ************************************************************/
 
-const apiUrl = 'https://sopimus.chatasilo.com';
+const apiUrl = 'https://api.chatasilo.com';
 
 // Bank Authentication Handling
 async function verifySession(token) {
