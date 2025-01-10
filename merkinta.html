@@ -1,54 +1,48 @@
 <!DOCTYPE html>
 <html lang="fi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Merkintälomake</title>
-    <link rel="stylesheet" href="styles4.css">
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Merkintälomake</title>
+   <link rel="stylesheet" href="./styles4.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Merkintälomake</h1>
-        
-        <form id="merkintaForm">
-            <!-- Investment type selection -->
-            <div class="form-group">
-                <label>Teen merkinnän:</label>
-                <div class="radio-group">
-                    <input type="radio" id="investSelf" name="investmentType" value="self" checked>
-                    <label for="investSelf">Itselleni</label>
-                    
-                    <input type="radio" id="investChild" name="investmentType" value="child">
-                    <label for="investChild">Alaikäiselle lapselleni</label>
-                    
-                    <input type="radio" id="investBusiness" name="investmentType" value="business">
-                    <label for="investBusiness">Yrityksen nimiin</label>
-                </div>
-            </div>
-            
-            <!-- Child SSN container -->
-            <div id="childSSNContainer" class="form-group" style="display: none;">
-                <label for="childSSN">Anna lapsesi henkilötunnus:</label>
-                <input type="text" id="childSSN" name="ID" class="form-control">
-            </div>
-            
-            <!-- Other parent email container -->
-            <div id="otherParentEmailContainer" class="form-group" style="display: none;">
-                <label for="otherParentEmail">Toisen vanhemman sähköpostiosoite:</label>
-                <input type="email" id="otherParentEmail" name="otherParentEmail" class="form-control">
-            </div>
-            
-            <!-- Business ID container -->
-            <div id="businessIDContainer" class="form-group" style="display: none;">
-                <label for="businessID">Anna Y-tunnus:</label>
-                <input type="text" id="businessID" name="ytunnus" class="form-control">
-            </div>
+   <div class="container">
+       <h1>Merkintälomake</h1>
+       
+       <form id="merkintaForm">
+           <!-- Investment type selection -->
+           <div class="form-group">
+               <label>Teen merkinnän:</label>
+               <div class="radio-group">
+                   <input type="radio" id="investSelf" name="investmentType" value="self" checked>
+                   <label for="investSelf">Itselleni</label>
+                   
+                   <input type="radio" id="investChild" name="investmentType" value="child">
+                   <label for="investChild">Alaikäiselle lapselleni</label>
+                   
+                   <input type="radio" id="investBusiness" name="investmentType" value="business">
+                   <label for="investBusiness">Yrityksen nimiin</label>
+               </div>
+           </div>
+           
+           <!-- Child SSN container -->
+           <div id="childSSNContainer" class="form-group" style="display: none;">
+               <label for="childSSN">Anna lapsesi henkilötunnus:</label>
+               <input type="text" id="childSSN" name="ID" class="form-control">
+           </div>
+           
+           <!-- Business ID container -->
+           <div id="businessIDContainer" class="form-group" style="display: none;">
+               <label for="businessID">Anna Y-tunnus:</label>
+               <input type="text" id="businessID" name="ytunnus" class="form-control">
+           </div>
+           <button type="submit" id="continueButton">Jatka</button>
+       </form>
+   </div>
 
-            <button type="submit" id="continueButton">Jatka</button>
-        </form>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/node-forge@1.3.1/dist/forge.min.js" crossorigin="anonymous"></script>
-    <script src="merkinta.js"></script>
+   <!-- Scripts at the end of body -->
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/forge/0.10.0/forge.min.js"></script>
+   <script src="./merkinta.js"></script>
 </body>
 </html>
