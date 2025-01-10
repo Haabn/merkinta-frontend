@@ -2,22 +2,7 @@
 * merkinta.js
 ************************************************************/
 
-// Error Handlers for Cookie-Related Issues
-window.addEventListener('error', function (e) {
-   if (e.message && (e.message.includes('cookie') || e.message.includes('Cookie') || 
-       e.message.includes('__vercel_live_token') || e.message.includes('SameSite'))) {
-       e.preventDefault();
-   }
-});
-
-window.addEventListener('warning', function (e) {
-   if (e.message && (e.message.includes('cookie') || e.message.includes('Cookie') ||
-       e.message.includes('__vercel_live_token') || e.message.includes('SameSite'))) {
-       e.preventDefault();
-   }
-});
-
-const apiUrl = import.meta.env.VITE_API_URL;
+const apiUrl = 'https://sopimus.chatasilo.com';
 
 // Bank Authentication Handling
 async function verifySession(token) {
@@ -148,6 +133,7 @@ async function checkDatabase(payload) {
 
    return response.json();
 }
+
 // Handle merkinta.html Form
 function handleMerkintaForm() {
    const elements = {
