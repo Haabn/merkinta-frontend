@@ -4,56 +4,156 @@
 
 const apiUrl = 'https://api.chatasilo.com';
 
-// Bank Authentication Handling
-async function verifySession(token) {
-   try {
-       const response = await fetch(`${apiUrl}/auth/verify-session`, {
-           method: 'POST',
-           headers: { 'Content-Type': 'application/json' },
-           body: JSON.stringify({ token })
-       });
-
-       if (!response.ok || !(await response.json()).valid) {
-           window.location.href = 'index.html';
-       }
-   } catch (error) {
-       console.error('Session verification failed:', error);
-       window.location.href = 'index.html';
-   }
+// Logging utility
+function logAuth(action, details = null) {
+    const timestamp = new Date().toISOString();
+    const logData = {
+        timestamp,
+        action,
+        details,
+        url: window.location.href
+    };
+    console.log('[Auth]', JSON.stringify(logData));
 }
 
-function handleBankAuth() {
-   const authButton = document.getElementById('startAuth');
-   if (authButton) {
-       authButton.addEventListener('click', async function () {
-           try {
-               const response = await fetch(`${apiUrl}/auth/session`, {
-                   method: 'POST',
-                   headers: {
-                       'Content-Type': 'application/json',
-                       'Accept': 'application/json'
-                   },
-                   body: JSON.stringify({}),
-                   mode: 'cors',
-                   credentials: 'include'
-               });
+// Session verification
+async function verifySession(token) {
+    logAuth('verifySession:start', { token: token?.slice(0, 4) + '...' });
 
-               if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-               const data = await response.json();
-               
-               if (data?.url) {
-                   window.location.href = data.url;
-               } else {
-                   throw new Error('No authentication URL received');
-               }
-           } catch (error) {
-               console.error('Authentication error:', error);
-               if (document.getElementById('errorMessage')) {
-                   document.getElementById('errorMessage').style.display = 'block';
-               }
-           }
-       });
-   }
+    try {
+        const response = await fetch(`${apiUrl}/auth/verify-session`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json' 
+            },
+            body: JSON.stringify({ token })
+        });
+
+        logAuth('verifySession:response', {
+            status: response.status,
+            statusText: response.statusText,
+            headers: Object.fromEntries(response.headers.entries())
+        });
+
+        const data = await response.json();
+        logAuth('verifySession:data', { valid: data.valid });
+
+        if (!response.ok || !data.valid) {
+            logAuth('verifySession:invalid', { 
+                responseOk: response.ok, 
+                dataValid: data.valid 
+            });
+            window.location.href = 'index.html';
+            return false;
+        }
+
+        logAuth('verifySession:success');
+        return true;
+    } catch (error) {
+        logAuth('verifySession:error', {
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+        });
+        window.location.href = 'index.html';
+        return false;
+    }
+}
+
+// Bank authentication handler
+function handleBankAuth() {
+    const authButton = document.getElementById('startAuth');
+    
+    if (!authButton) {
+        logAuth('handleBankAuth:error', 'Start auth button not found');
+        return;
+    }
+
+    logAuth('handleBankAuth:initialized');
+
+    authButton.addEventListener('click', async function (event) {
+        event.preventDefault();
+        logAuth('handleBankAuth:buttonClicked');
+
+        // Disable button to prevent double submission
+        authButton.disabled = true;
+        logAuth('handleBankAuth:buttonDisabled');
+
+        try {
+            logAuth('handleBankAuth:fetchingSession');
+            
+            const response = await fetch(`${apiUrl}/auth/session`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({}),
+                mode: 'cors',
+                credentials: 'include'
+            });
+
+            logAuth('handleBankAuth:sessionResponse', {
+                status: response.status,
+                statusText: response.statusText,
+                headers: Object.fromEntries(response.headers.entries())
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            logAuth('handleBankAuth:sessionData', { 
+                hasUrl: Boolean(data?.url),
+                url: data?.url?.substring(0, 30) + '...' // Log partial URL for privacy
+            });
+            
+            if (data?.url) {
+                logAuth('handleBankAuth:redirecting', { 
+                    url: data.url.substring(0, 30) + '...' 
+                });
+                // Small delay to ensure logs are sent
+                setTimeout(() => {
+                    window.location.href = data.url;
+                }, 100);
+            } else {
+                throw new Error('No authentication URL received');
+            }
+        } catch (error) {
+            logAuth('handleBankAuth:error', {
+                message: error.message,
+                stack: error.stack,
+                name: error.name
+            });
+
+            // Re-enable the button
+            authButton.disabled = false;
+            logAuth('handleBankAuth:buttonReenabled');
+
+            // Show error message
+            const errorElement = document.getElementById('errorMessage');
+            if (errorElement) {
+                errorElement.textContent = 'Kirjautumisessa tapahtui virhe. Ole hyvä ja yritä uudelleen.';
+                errorElement.style.display = 'block';
+                logAuth('handleBankAuth:errorDisplayed');
+            } else {
+                logAuth('handleBankAuth:errorElementMissing');
+                alert('Kirjautumisessa tapahtui virhe. Ole hyvä ja yritä uudelleen.');
+            }
+        }
+    });
+
+    // Create error message element if it doesn't exist
+    if (!document.getElementById('errorMessage')) {
+        const errorDiv = document.createElement('div');
+        errorDiv.id = 'errorMessage';
+        errorDiv.style.display = 'none';
+        errorDiv.className = 'error-message';
+        authButton.parentNode.insertBefore(errorDiv, authButton.nextSibling);
+        logAuth('handleBankAuth:errorElementCreated');
+    }
 }
 
 // Encryption & Submission Logic
