@@ -16,19 +16,17 @@ function logAuth(action, details = null) {
     console.log('[Auth]', JSON.stringify(logData));
 }
 
-// Session verification
+// Session verification (unchanged)
 async function verifySession(token) {
   logAuth('verifySession:start', { token: token?.slice(0, 4) + '...' });
   try {
-    // The critical part is passing the token in the Authorization header:
     const response = await fetch(`${apiUrl}/auth/verify-session`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        'Authorization': `Bearer ${token}` // <-- important!
+        'Authorization': `Bearer ${token}`
       },
-      // The body can be empty or just {}
       body: JSON.stringify({})
     });
 
@@ -38,14 +36,12 @@ async function verifySession(token) {
     });
 
     const data = await response.json();
-    // If the backend says invalid or expired, redirect
     if (!response.ok || !data.valid) {
       logAuth('verifySession:invalid', { status: response.status, data });
       window.location.href = 'https://sopimus.chatasilo.com/index.html';
       return false;
     }
 
-    // If it's valid, we can proceed to merkinta.html if not already there
     if (!window.location.pathname.includes('merkinta.html')) {
       window.location.href = 'https://sopimus.chatasilo.com/merkinta.html';
     }
@@ -197,14 +193,14 @@ eG3Ma507zr8c5DYyhTzX/F3/o2CjtYhl6cHy2UUbMKdglgZrZDT/WQWZnaDFUm3t
    };
 }
 
-async function submitFormData(formData) {
+async function submitFormData(formData, token) {
    const formDataObj = Object.fromEntries(formData.entries());
    const encryptedData = encryptDataForTransmission(formDataObj);
 
    const response = await fetch(`${apiUrl}/merkinta/decrypt`, {
        method: 'POST',
        headers: {
-           'Authorization': `Bearer ${token}`,
+           'Authorization': `Bearer ${token}`,  // Pass token here
            'Content-Type': 'application/json',
            'Accept': 'application/json'
        },
@@ -219,11 +215,11 @@ async function submitFormData(formData) {
    return response.json();
 }
 
-async function checkDatabase(payload) {
+async function checkDatabase(payload, token) {
    const response = await fetch(`${apiUrl}/merkinta/check-info`, {
        method: 'POST',
        headers: {
-           'Authorization': `Bearer ${token}`,
+           'Authorization': `Bearer ${token}`,  // Pass token here
            'Content-Type': 'application/json',
            'Accept': 'application/json'
        },
@@ -238,6 +234,7 @@ async function checkDatabase(payload) {
 
    return response.json();
 }
+
 
 // Handle merkinta.html Form
 function handleMerkintaForm() {
@@ -276,6 +273,44 @@ function handleMerkintaForm() {
    }
 
    // Handle form submission
+   function handleMerkintaForm() {
+   const elements = {
+       form: document.getElementById('merkintaForm'),
+       investmentTypeRadios: document.getElementsByName('investmentType'),
+       childSSNInput: document.getElementById('childSSN'),
+       businessIDInput: document.getElementById('businessID'),
+       childSSNContainer: document.getElementById('childSSNContainer'),
+       businessIDContainer: document.getElementById('businessIDContainer')
+   };
+
+   // Extract authData from query string
+   const urlParams = new URLSearchParams(window.location.search);
+   const authData = urlParams.has('auth_data') 
+       ? JSON.parse(atob(urlParams.get('auth_data'))) 
+       : null;
+
+   // If we have a sessionToken from Signicat
+   if (authData?.sessionToken) {
+       verifySession(authData.sessionToken);
+   }
+
+   // Investment type toggles
+   if (elements.investmentTypeRadios) {
+       elements.investmentTypeRadios.forEach(radio => {
+           radio.addEventListener('change', function() {
+               elements.childSSNContainer.style.display = 'none';
+               elements.businessIDContainer.style.display = 'none';
+
+               if (this.value === 'child') {
+                   elements.childSSNContainer.style.display = 'block';
+               } else if (this.value === 'business') {
+                   elements.businessIDContainer.style.display = 'block';
+               }
+           });
+       });
+   }
+
+   // Form submission
    if (elements.form) {
        elements.form.addEventListener('submit', async function(e) {
            e.preventDefault();
@@ -283,19 +318,19 @@ function handleMerkintaForm() {
            const investmentType = formData.get('investmentType');
 
            try {
-               let checkResult;
-               
+               let checkResult = null;
+
+               // We must pass authData.sessionToken to checkDatabase for all types:
                if (investmentType === 'self') {
                    if (!authData?.nationalIdentityNumber) {
                        throw new Error('No identification data found');
                    }
-                   
                    checkResult = await checkDatabase({
-                  type: 'self',
-                  ssn: authData.nationalIdentityNumber
-                }, authData.sessionToken);   // pass token here
-                }
-               else if (investmentType === 'child') {
+                     type: 'self',
+                     ssn: authData.nationalIdentityNumber
+                   }, authData.sessionToken);
+
+               } else if (investmentType === 'child') {
                    if (!elements.childSSNInput.value) {
                        alert('Anna lapsen henkilötunnus');
                        return;
@@ -303,9 +338,9 @@ function handleMerkintaForm() {
                    checkResult = await checkDatabase({
                        type: 'child',
                        ssn: elements.childSSNInput.value
-                   });
-               }
-               else if (investmentType === 'business') {
+                   }, authData?.sessionToken); // Also pass token here
+
+               } else if (investmentType === 'business') {
                    if (!elements.businessIDInput.value) {
                        alert('Anna Y-tunnus');
                        return;
@@ -313,7 +348,7 @@ function handleMerkintaForm() {
                    checkResult = await checkDatabase({
                        type: 'business',
                        businessId: elements.businessIDInput.value
-                   });
+                   }, authData?.sessionToken);
                }
 
                sessionStorage.setItem('merkintaData', JSON.stringify({
@@ -321,7 +356,7 @@ function handleMerkintaForm() {
                    databaseCheck: checkResult,
                    formData: Object.fromEntries(formData)
                }));
-               
+
                window.location.href = 'merkinta2.html';
            } catch (error) {
                console.error('Error during form submission:', error);
@@ -353,11 +388,10 @@ function handleMerkinta2Form() {
        summaError: document.getElementById('summaError')
    };
 
-   // Show/hide additional info based on database check
+   // Show/hide additional info based on DB check result
    if (databaseCheck) {
        if (investmentType === 'self') {
-           elements.selfAdditionalInfoContainer.style.display = 
-               databaseCheck.found ? 'none' : 'block';
+           elements.selfAdditionalInfoContainer.style.display = databaseCheck.found ? 'none' : 'block';
            if (databaseCheck.found && databaseCheck.data) {
                Object.keys(databaseCheck.data).forEach(key => {
                    const input = document.querySelector(`input[name="${key}"]`);
@@ -365,8 +399,7 @@ function handleMerkinta2Form() {
                });
            }
        } else if (investmentType === 'child') {
-           elements.childAdditionalInfoContainer.style.display = 
-               databaseCheck.found ? 'none' : 'block';
+           elements.childAdditionalInfoContainer.style.display = databaseCheck.found ? 'none' : 'block';
            if (databaseCheck.found && databaseCheck.data) {
                Object.keys(databaseCheck.data).forEach(key => {
                    const input = document.querySelector(`input[name="${key}"]`);
@@ -374,8 +407,7 @@ function handleMerkinta2Form() {
                });
            }
        } else if (investmentType === 'business') {
-           elements.businessAdditionalInfoContainer.style.display = 
-               databaseCheck.found ? 'none' : 'block';
+           elements.businessAdditionalInfoContainer.style.display = databaseCheck.found ? 'none' : 'block';
            if (databaseCheck.found && databaseCheck.data) {
                Object.keys(databaseCheck.data).forEach(key => {
                    const input = document.querySelector(`input[name="${key}"]`);
@@ -385,17 +417,16 @@ function handleMerkinta2Form() {
        }
    }
 
-   // Handle additional account ownership info visibility
+   // Additional account ownership info 
    if (elements.id3rRadios) {
        elements.id3rRadios.forEach(radio => {
            radio.addEventListener('change', function() {
-               elements.id3Container.style.display = 
-                   this.value === 'joo' ? 'block' : 'none';
+               elements.id3Container.style.display = this.value === 'joo' ? 'block' : 'none';
            });
        });
    }
 
-   // Handle form submission
+   // Submit final data
    if (elements.form) {
        elements.form.addEventListener('submit', async function(e) {
            e.preventDefault();
@@ -408,19 +439,16 @@ function handleMerkinta2Form() {
            }
 
            try {
-               // Create final form data
+               // Gather final form data
                const finalFormData = new FormData(this);
-
-               // Add investment type
                finalFormData.append('investmentType', investmentType);
 
-               // Add auth data if it's a self investment
                if (investmentType === 'self' && authData) {
                    finalFormData.append('nationalIdentityNumber', authData.nationalIdentityNumber);
                    finalFormData.append('name', authData.name);
                }
 
-               // Add database data if found
+               // If DB data found, fill in any missing fields
                if (databaseCheck?.found && databaseCheck.data) {
                    Object.entries(databaseCheck.data).forEach(([key, value]) => {
                        if (!finalFormData.has(key)) {
@@ -429,7 +457,8 @@ function handleMerkinta2Form() {
                    });
                }
 
-               const response = await submitFormData(finalFormData);
+               // Pass token here, too
+               const response = await submitFormData(finalFormData, authData?.sessionToken);
                if (response.status === 'success') {
                    sessionStorage.removeItem('merkintaData');
                    window.location.href = 'page12.html';
@@ -444,7 +473,8 @@ function handleMerkinta2Form() {
    }
 }
 
-// Initialize
+
+// DOM load
 document.addEventListener('DOMContentLoaded', function () {
    const currentPage = window.location.pathname.split('/').pop();
 
