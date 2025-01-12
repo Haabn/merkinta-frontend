@@ -18,65 +18,49 @@ function logAuth(action, details = null) {
 
 // Session verification
 async function verifySession(token) {
-    logAuth('verifySession:start', { token: token?.slice(0, 4) + '...' });
+  logAuth('verifySession:start', { token: token?.slice(0, 4) + '...' });
+  try {
+    // The critical part is passing the token in the Authorization header:
+    const response = await fetch(`${apiUrl}/auth/verify-session`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${token}` // <-- important!
+      },
+      // The body can be empty or just {}
+      body: JSON.stringify({})
+    });
 
-    try {
-        const response = await fetch(`${apiUrl}/auth/verify-session`, {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Accept': 'application/json' 
-            },
-            body: JSON.stringify({ token })
-        });
+    logAuth('verifySession:response', {
+      status: response.status,
+      statusText: response.statusText
+    });
 
-        logAuth('verifySession:response', {
-            status: response.status,
-            statusText: response.statusText,
-            headers: Object.fromEntries(response.headers.entries())
-        });
-
-        const data = await response.json();
-        logAuth('verifySession:data', { valid: data.valid });
-
-        if (!response.ok || !data.valid) {
-            logAuth('verifySession:invalid', { 
-                responseOk: response.ok, 
-                dataValid: data.valid 
-            });
-            window.location.href = 'https://sopimus.chatasilo.com/index.html';
-            return false;
-        }
-        logAuth('verifySession:success');
-        return true;
-    } catch (error) {
-        logAuth('verifySession:error', {
-            message: error.message,
-            stack: error.stack,
-            name: error.name
-        });
-        window.location.href = 'index.html';
-        return false;
+    const data = await response.json();
+    // If the backend says invalid or expired, redirect
+    if (!response.ok || !data.valid) {
+      logAuth('verifySession:invalid', { status: response.status, data });
+      window.location.href = 'https://sopimus.chatasilo.com/index.html';
+      return false;
     }
 
-// If we're already on merkinta.html, don't redirect
-        if (!window.location.pathname.includes('merkinta.html')) {
-            window.location.href = 'https://sopimus.chatasilo.com/merkinta.html';
-        }
-
-        logAuth('verifySession:success');
-        return true;
-    } catch (error) {
-        logAuth('verifySession:error', {
-            message: error.message,
-            stack: error.stack,
-            name: error.name
-        });
-        window.location.href = 'https://sopimus.chatasilo.com/index.html';
-        return false;
+    // If it's valid, we can proceed to merkinta.html if not already there
+    if (!window.location.pathname.includes('merkinta.html')) {
+      window.location.href = 'https://sopimus.chatasilo.com/merkinta.html';
     }
+
+    logAuth('verifySession:success');
+    return true;
+  } catch (error) {
+    logAuth('verifySession:error', {
+      message: error.message,
+      stack: error.stack,
+    });
+    window.location.href = 'https://sopimus.chatasilo.com/index.html';
+    return false;
+  }
 }
-
 
 // In merkinta.js, update the handleBankAuth function
 function handleBankAuth() {
