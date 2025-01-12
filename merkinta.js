@@ -44,10 +44,9 @@ async function verifySession(token) {
                 responseOk: response.ok, 
                 dataValid: data.valid 
             });
-            window.location.href = 'index.html';
+            window.location.href = 'https://sopimus.chatasilo.com/index.html';
             return false;
         }
-
         logAuth('verifySession:success');
         return true;
     } catch (error) {
@@ -59,9 +58,27 @@ async function verifySession(token) {
         window.location.href = 'index.html';
         return false;
     }
+
+// If we're already on merkinta.html, don't redirect
+        if (!window.location.pathname.includes('merkinta.html')) {
+            window.location.href = 'https://sopimus.chatasilo.com/merkinta.html';
+        }
+
+        logAuth('verifySession:success');
+        return true;
+    } catch (error) {
+        logAuth('verifySession:error', {
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+        });
+        window.location.href = 'https://sopimus.chatasilo.com/index.html';
+        return false;
+    }
 }
 
-// Bank authentication handler
+
+// In merkinta.js, update the handleBankAuth function
 function handleBankAuth() {
     const authButton = document.getElementById('startAuth');
     
@@ -76,7 +93,6 @@ function handleBankAuth() {
         event.preventDefault();
         logAuth('handleBankAuth:buttonClicked');
 
-        // Disable button to prevent double submission
         authButton.disabled = true;
         logAuth('handleBankAuth:buttonDisabled');
 
@@ -89,10 +105,13 @@ function handleBankAuth() {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify({}),
+                body: JSON.stringify({
+                    returnUrl: 'https://sopimus.chatasilo.com/merkinta.html'  // Full domain URL
+                }),
                 mode: 'cors',
                 credentials: 'include'
             });
+
 
             logAuth('handleBankAuth:sessionResponse', {
                 status: response.status,
