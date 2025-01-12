@@ -204,6 +204,7 @@ async function submitFormData(formData) {
    const response = await fetch(`${apiUrl}/merkinta/decrypt`, {
        method: 'POST',
        headers: {
+           'Authorization': `Bearer ${token}`,
            'Content-Type': 'application/json',
            'Accept': 'application/json'
        },
@@ -222,6 +223,7 @@ async function checkDatabase(payload) {
    const response = await fetch(`${apiUrl}/merkinta/check-info`, {
        method: 'POST',
        headers: {
+           'Authorization': `Bearer ${token}`,
            'Content-Type': 'application/json',
            'Accept': 'application/json'
        },
@@ -287,11 +289,12 @@ function handleMerkintaForm() {
                    if (!authData?.nationalIdentityNumber) {
                        throw new Error('No identification data found');
                    }
+                   
                    checkResult = await checkDatabase({
-                       type: 'self',
-                       ssn: authData.nationalIdentityNumber
-                   });
-               }
+                  type: 'self',
+                  ssn: authData.nationalIdentityNumber
+                }, authData.sessionToken);   // pass token here
+                }
                else if (investmentType === 'child') {
                    if (!elements.childSSNInput.value) {
                        alert('Anna lapsen henkilötunnus');
