@@ -12,6 +12,26 @@ const fetchConfig = {
     }
 };
 
+function handleAuthError(button) {
+    button.disabled = false;
+    logAuth('handleBankAuth:buttonReenabled');
+
+    const errorElement = document.getElementById('errorMessage') || createErrorElement(button);
+    errorElement.textContent = 'Kirjautumisessa tapahtui virhe. Ole hyvä ja yritä uudelleen.';
+    errorElement.style.display = 'block';
+    logAuth('handleBankAuth:errorDisplayed');
+}
+
+function createErrorElement(button) {
+    const errorDiv = document.createElement('div');
+    errorDiv.id = 'errorMessage';
+    errorDiv.style.display = 'none';
+    errorDiv.className = 'error-message';
+    button.parentNode.insertBefore(errorDiv, button.nextSibling);
+    logAuth('handleBankAuth:errorElementCreated');
+    return errorDiv;
+}
+
 // Logging utility
 function logAuth(action, details = null) {
     const timestamp = new Date().toISOString();
