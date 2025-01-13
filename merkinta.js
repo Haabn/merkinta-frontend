@@ -236,134 +236,98 @@ async function checkDatabase(payload, token) {
 }
 
 
-// Handle merkinta.html Form
-function handleMerkintaForm() {
-   const elements = {
-       form: document.getElementById('merkintaForm'),
-       investmentTypeRadios: document.getElementsByName('investmentType'),
-       childSSNInput: document.getElementById('childSSN'),
-       businessIDInput: document.getElementById('businessID'),
-       childSSNContainer: document.getElementById('childSSNContainer'),
-       businessIDContainer: document.getElementById('businessIDContainer')
-   };
-
-   // Handle auth data
-   const urlParams = new URLSearchParams(window.location.search);
-   const authData = urlParams.has('auth_data') ? 
-       JSON.parse(atob(urlParams.get('auth_data'))) : null;
-
-   if (authData?.sessionToken) {
-       verifySession(authData.sessionToken);
-   }
-
-   // Handle investment type changes
-   if (elements.investmentTypeRadios) {
-       elements.investmentTypeRadios.forEach(radio => {
-           radio.addEventListener('change', function() {
-               elements.childSSNContainer.style.display = 'none';
-               elements.businessIDContainer.style.display = 'none';
-
-               if (this.value === 'child') {
-                   elements.childSSNContainer.style.display = 'block';
-               } else if (this.value === 'business') {
-                   elements.businessIDContainer.style.display = 'block';
-               }
-           });
-       });
-   }
 
    // Handle form submission
-   function handleMerkintaForm() {
-   const elements = {
-       form: document.getElementById('merkintaForm'),
-       investmentTypeRadios: document.getElementsByName('investmentType'),
-       childSSNInput: document.getElementById('childSSN'),
-       businessIDInput: document.getElementById('businessID'),
-       childSSNContainer: document.getElementById('childSSNContainer'),
-       businessIDContainer: document.getElementById('businessIDContainer')
-   };
+// Remove the nested handleMerkintaForm function - it's duplicated
+function handleMerkintaForm() {
+    const elements = {
+        form: document.getElementById('merkintaForm'),
+        investmentTypeRadios: document.getElementsByName('investmentType'),
+        childSSNInput: document.getElementById('childSSN'),
+        businessIDInput: document.getElementById('businessID'),
+        childSSNContainer: document.getElementById('childSSNContainer'),
+        businessIDContainer: document.getElementById('businessIDContainer')
+    };
 
-   // Extract authData from query string
-   const urlParams = new URLSearchParams(window.location.search);
-   const authData = urlParams.has('auth_data') 
-       ? JSON.parse(atob(urlParams.get('auth_data'))) 
-       : null;
+    // Handle auth data
+    const urlParams = new URLSearchParams(window.location.search);
+    const authData = urlParams.has('auth_data') ? 
+        JSON.parse(atob(urlParams.get('auth_data'))) : null;
 
-   // If we have a sessionToken from Signicat
-   if (authData?.sessionToken) {
-       verifySession(authData.sessionToken);
-   }
+    if (authData?.sessionToken) {
+        verifySession(authData.sessionToken);
+    }
 
-   // Investment type toggles
-   if (elements.investmentTypeRadios) {
-       elements.investmentTypeRadios.forEach(radio => {
-           radio.addEventListener('change', function() {
-               elements.childSSNContainer.style.display = 'none';
-               elements.businessIDContainer.style.display = 'none';
+    // Handle investment type changes
+    if (elements.investmentTypeRadios) {
+        elements.investmentTypeRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                elements.childSSNContainer.style.display = 'none';
+                elements.businessIDContainer.style.display = 'none';
 
-               if (this.value === 'child') {
-                   elements.childSSNContainer.style.display = 'block';
-               } else if (this.value === 'business') {
-                   elements.businessIDContainer.style.display = 'block';
-               }
-           });
-       });
-   }
+                if (this.value === 'child') {
+                    elements.childSSNContainer.style.display = 'block';
+                } else if (this.value === 'business') {
+                    elements.businessIDContainer.style.display = 'block';
+                }
+            });
+        });
+    }
 
-   // Form submission
-   if (elements.form) {
-       elements.form.addEventListener('submit', async function(e) {
-           e.preventDefault();
-           const formData = new FormData(this);
-           const investmentType = formData.get('investmentType');
+    // Form submission
+    if (elements.form) {
+        elements.form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const investmentType = formData.get('investmentType');
 
-           try {
-               let checkResult = null;
+            try {
+                let checkResult = null;
 
-               // We must pass authData.sessionToken to checkDatabase for all types:
-               if (investmentType === 'self') {
-                   if (!authData?.nationalIdentityNumber) {
-                       throw new Error('No identification data found');
-                   }
-                   checkResult = await checkDatabase({
-                     type: 'self',
-                     ssn: authData.nationalIdentityNumber
-                   }, authData.sessionToken);
+                // We must pass authData.sessionToken to checkDatabase for all types:
+                if (investmentType === 'self') {
+                    if (!authData?.nationalIdentityNumber) {
+                        throw new Error('No identification data found');
+                    }
+                    checkResult = await checkDatabase({
+                        type: 'self',
+                        ssn: authData.nationalIdentityNumber
+                    }, authData.sessionToken);
 
-               } else if (investmentType === 'child') {
-                   if (!elements.childSSNInput.value) {
-                       alert('Anna lapsen henkilötunnus');
-                       return;
-                   }
-                   checkResult = await checkDatabase({
-                       type: 'child',
-                       ssn: elements.childSSNInput.value
-                   }, authData?.sessionToken); // Also pass token here
+                } else if (investmentType === 'child') {
+                    if (!elements.childSSNInput.value) {
+                        alert('Anna lapsen henkilötunnus');
+                        return;
+                    }
+                    checkResult = await checkDatabase({
+                        type: 'child',
+                        ssn: elements.childSSNInput.value
+                    }, authData?.sessionToken);
 
-               } else if (investmentType === 'business') {
-                   if (!elements.businessIDInput.value) {
-                       alert('Anna Y-tunnus');
-                       return;
-                   }
-                   checkResult = await checkDatabase({
-                       type: 'business',
-                       businessId: elements.businessIDInput.value
-                   }, authData?.sessionToken);
-               }
+                } else if (investmentType === 'business') {
+                    if (!elements.businessIDInput.value) {
+                        alert('Anna Y-tunnus');
+                        return;
+                    }
+                    checkResult = await checkDatabase({
+                        type: 'business',
+                        businessId: elements.businessIDInput.value
+                    }, authData?.sessionToken);
+                }
 
-               sessionStorage.setItem('merkintaData', JSON.stringify({
-                   authData,
-                   databaseCheck: checkResult,
-                   formData: Object.fromEntries(formData)
-               }));
+                sessionStorage.setItem('merkintaData', JSON.stringify({
+                    authData,
+                    databaseCheck: checkResult,
+                    formData: Object.fromEntries(formData)
+                }));
 
-               window.location.href = 'merkinta2.html';
-           } catch (error) {
-               console.error('Error during form submission:', error);
-               alert('Jotain meni pieleen. Yritä uudelleen.');
-           }
-       });
-   }
+                window.location.href = 'merkinta2.html';
+            } catch (error) {
+                console.error('Error during form submission:', error);
+                alert('Jotain meni pieleen. Yritä uudelleen.');
+            }
+        });
+    }
 }
 
 // Handle merkinta2.html Form
