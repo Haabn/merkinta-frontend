@@ -3,6 +3,14 @@
 ************************************************************/
 
 const apiUrl = 'https://api.chatasilo.com';
+const fetchConfig = {
+    credentials: 'include',
+    mode: 'cors',
+    headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    }
+};
 
 // Logging utility
 function logAuth(action, details = null) {
@@ -18,44 +26,48 @@ function logAuth(action, details = null) {
 
 // Session verification (unchanged)
 async function verifySession(token) {
-  logAuth('verifySession:start', { token: token?.slice(0, 4) + '...' });
-  try {
-    const response = await fetch(`${apiUrl}/auth/verify-session`, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({})
-    });
+    logAuth('verifySession:start', { token: token?.slice(0, 4) + '...' });
+    try {
+        const response = await fetch(`${apiUrl}/auth/verify-session`, {
+            method: 'POST',
+            ...fetchConfig,
+            headers: {
+                ...fetchConfig.headers,
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ token })  // Add token to body as well
+        });
 
-    logAuth('verifySession:response', {
-      status: response.status,
-      statusText: response.statusText
-    });
+        logAuth('verifySession:response', {
+            status: response.status,
+            statusText: response.statusText
+        });
 
-    const data = await response.json();
-    if (!response.ok || !data.valid) {
-      logAuth('verifySession:invalid', { status: response.status, data });
-      window.location.href = 'https://sopimus.chatasilo.com/index.html';
-      return false;
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (!data.valid) {
+            logAuth('verifySession:invalid', { data });
+            window.location.href = 'https://sopimus.chatasilo.com/index.html';
+            return false;
+        }
+
+        if (!window.location.pathname.includes('merkinta.html')) {
+            window.location.href = 'https://sopimus.chatasilo.com/merkinta.html';
+        }
+
+        logAuth('verifySession:success');
+        return true;
+    } catch (error) {
+        logAuth('verifySession:error', {
+            message: error.message,
+            stack: error.stack,
+        });
+        window.location.href = 'https://sopimus.chatasilo.com/index.html';
+        return false;
     }
-
-    if (!window.location.pathname.includes('merkinta.html')) {
-      window.location.href = 'https://sopimus.chatasilo.com/merkinta.html';
-    }
-
-    logAuth('verifySession:success');
-    return true;
-  } catch (error) {
-    logAuth('verifySession:error', {
-      message: error.message,
-      stack: error.stack,
-    });
-    window.location.href = 'https://sopimus.chatasilo.com/index.html';
-    return false;
-  }
 }
 
 // In merkinta.js, update the handleBankAuth function
@@ -81,17 +93,11 @@ function handleBankAuth() {
             
             const response = await fetch(`${apiUrl}/auth/session`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
+                ...fetchConfig,
                 body: JSON.stringify({
-                    returnUrl: 'https://sopimus.chatasilo.com/merkinta.html'  // Full domain URL
-                }),
-                mode: 'cors',
-                credentials: 'include'
+                    returnUrl: 'https://sopimus.chatasilo.com/merkinta.html'
+                })
             });
-
 
             logAuth('handleBankAuth:sessionResponse', {
                 status: response.status,
@@ -106,17 +112,14 @@ function handleBankAuth() {
             const data = await response.json();
             logAuth('handleBankAuth:sessionData', { 
                 hasUrl: Boolean(data?.url),
-                url: data?.url?.substring(0, 30) + '...' // Log partial URL for privacy
+                url: data?.url?.substring(0, 30) + '...'
             });
             
             if (data?.url) {
                 logAuth('handleBankAuth:redirecting', { 
                     url: data.url.substring(0, 30) + '...' 
                 });
-                // Small delay to ensure logs are sent
-                setTimeout(() => {
-                    window.location.href = data.url;
-                }, 100);
+                window.location.href = data.url;
             } else {
                 throw new Error('No authentication URL received');
             }
@@ -126,33 +129,9 @@ function handleBankAuth() {
                 stack: error.stack,
                 name: error.name
             });
-
-            // Re-enable the button
-            authButton.disabled = false;
-            logAuth('handleBankAuth:buttonReenabled');
-
-            // Show error message
-            const errorElement = document.getElementById('errorMessage');
-            if (errorElement) {
-                errorElement.textContent = 'Kirjautumisessa tapahtui virhe. Ole hyvä ja yritä uudelleen.';
-                errorElement.style.display = 'block';
-                logAuth('handleBankAuth:errorDisplayed');
-            } else {
-                logAuth('handleBankAuth:errorElementMissing');
-                alert('Kirjautumisessa tapahtui virhe. Ole hyvä ja yritä uudelleen.');
-            }
+            handleAuthError(authButton);
         }
     });
-
-    // Create error message element if it doesn't exist
-    if (!document.getElementById('errorMessage')) {
-        const errorDiv = document.createElement('div');
-        errorDiv.id = 'errorMessage';
-        errorDiv.style.display = 'none';
-        errorDiv.className = 'error-message';
-        authButton.parentNode.insertBefore(errorDiv, authButton.nextSibling);
-        logAuth('handleBankAuth:errorElementCreated');
-    }
 }
 
 // Encryption & Submission Logic
