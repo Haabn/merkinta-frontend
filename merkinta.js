@@ -304,10 +304,9 @@ function handleMerkintaForm() {
         verifySession(authData.sessionToken).catch(error => {
             logAuth('handleMerkintaForm:sessionVerificationFailed', { error: error.message });
         });
-    }
     } else {
         // Redirect to login if no auth data
-        console.error('No auth data found');
+        logAuth('handleMerkintaForm:noToken');
         window.location.href = 'index.html';
         return;
     }
