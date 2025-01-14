@@ -6,6 +6,8 @@ body {
     background-color: #f0ece3;
     margin: 0;
     padding-top: 10vh;
+    min-height: 100%;
+    height: auto;
 }
 
 .container {
@@ -40,22 +42,16 @@ form {
 
 /* Radio buttons styling */
 .radio-group {
-    display: flex; /* Use flexbox to align elements */
-    align-items: center; /* Align items vertically */
-    gap: 10px; /* Space between buttons and labels */
+    margin-bottom: 20px;
 }
 
-.radio-group input[type="radio"] {
-    margin: 0;
-    display: inline-block; /* Ensure the radio button stays inline */
+.radio-item {
+    margin-bottom: 15px;
 }
 
-.radio-group label {
-    display: inline-block;
-    margin: 0;
-    vertical-align: middle;
+.radio-item input[type="radio"] {
+    margin-right: 10px;
 }
-
 
 /* Text inputs */
 input[type="text"] {
@@ -91,7 +87,7 @@ input[type="number"]::-webkit-outer-spin-button {
     border: 1px solid #e9ecef;
     border-radius: 4px;
     padding: 15px;
-    margin: 20px 0;
+    margin-bottom: 20px;
     font-size: 14px;
     line-height: 1.5;
 }
@@ -99,12 +95,16 @@ input[type="number"]::-webkit-outer-spin-button {
 /* Error message */
 .error-message {
     color: #dc3545;
-    font-size: 14px;
-    margin-top: 5px;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 4px;
+    background-color: #fff8f8;
+    border: 1px solid #dc3545;
+    display: none;
 }
 
 /* Submit button */
-button[type="submit"] {
+.submit-button, button[type="submit"] {
     width: 100%;
     padding: 12px;
     background-color: #00509e;
@@ -113,98 +113,3 @@ button[type="submit"] {
     border-radius: 4px;
     font-size: 16px;
     cursor: pointer;
-    margin-top: 20px;
-}
-
-button[type="submit"]:hover {
-    background-color: #003f87;
-}
-
-button[type="submit"]:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
-}
-
-/* Thank you message for "Ei" response */
-#kiitosViesti_Ei {
-    text-align: center;
-    padding: 20px;
-    background-color: #d4edda;      /* Light green background */
-    border: 1px solid #c3e6cb;
-    border-radius: 4px;
-    color: #155724;                 /* Dark green text */
-    margin: 20px 0;
-}
-
-/* Thank you message for completed form */
-#kiitosViesti_Valmis {
-    text-align: center;
-    padding: 20px;
-    background-color: #cce5ff;      /* Light blue background */
-    border: 1px solid #b8daff;
-    border-radius: 4px;
-    color: #004085;                 /* Dark blue text */
-    margin: 20px 0;
-}
-
-/* Hidden elements */
-[style*="display: none"] {
-    display: none !important;
-}
-/* Existing styles remain the same */
-
-/* Error States */
-input.error,
-textarea.error {
-    border-color: #dc3545;
-    background-color: #fff8f8;
-}
-
-input.error:focus,
-textarea.error:focus {
-    border-color: #dc3545;
-    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
-    outline: none;
-}
-
-.radio-group.error {
-    padding: 10px;
-    border: 1px solid #dc3545;
-    border-radius: 4px;
-    background-color: #fff8f8;
-}
-
-/* Error Message Styling */
-.error-message {
-    color: #dc3545;
-    font-size: 0.875em;
-    margin-top: 5px;
-    display: block;
-}
-
-/* Required Field Indicator */
-label.required::after {
-    content: " *";
-    color: #dc3545;
-}
-
-/* Visual feedback for invalid fields */
-input:invalid,
-textarea:invalid {
-    border-color: #dc3545;
-}
-
-/* Animation for error state */
-@keyframes errorShake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    75% { transform: translateX(5px); }
-}
-
-.error {
-    animation: errorShake 0.4s ease-in-out;
-}
-html, body {
-    min-height: 100%;
-    height: auto;
-}
