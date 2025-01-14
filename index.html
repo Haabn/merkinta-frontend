@@ -1,121 +1,39 @@
-import React, { useState } from 'react';
-import { Alert, AlertTitle } from '@/components/ui/alert';
-
-const AuthenticationForm = () => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleAuth = async (event) => {
-    event.preventDefault();
-    const customerStatus = document.querySelector('input[name="customerStatus"]:checked')?.value;
-    
-    if (!customerStatus) {
-      setError('Valitse asiakassopimuksen tila ennen jatkamista.');
-      return;
-    }
-
-    setIsSubmitting(true);
-    setError('');
-
-    try {
-      const response = await fetch('https://api.chatasilo.com/auth/session', {
-        method: 'POST',
-        credentials: 'include',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          returnUrl: customerStatus === 'hasAgreement' 
-            ? 'https://sopimus.chatasilo.com/merkinta.html'
-            : 'https://sopimus.chatasilo.com/asiakassopimus.html',
-          customerStatus
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Kirjautumisessa tapahtui virhe');
-      }
-
-      const data = await response.json();
-      if (data?.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error('Tunnistautumisessa tapahtui virhe');
-      }
-    } catch (error) {
-      setError('Kirjautumisessa tapahtui virhe. Ole hyvä ja yritä uudelleen.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  return (
-    <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Tunnistautuminen</h1>
-      
-      <form onSubmit={handleAuth} className="space-y-6">
-        <div className="bg-blue-50 p-6 rounded-lg">
-          <p className="text-gray-700">
-            Tehdäksesi merkinnän, sinun tulee ensin tunnistautua pankkitunnuksilla.
-          </p>
-          
-          {error && (
-            <Alert variant="destructive" className="mt-4">
-              <AlertTitle>{error}</AlertTitle>
-            </Alert>
-          )}
-        </div>
-
-        <div className="space-y-6">
-          <div className="space-y-4">
-            <div className="flex items-start space-x-3">
-              <input
-                type="radio"
-                id="hasAgreement"
-                name="customerStatus"
-                value="hasAgreement"
-                className="mt-1"
-                required
-              />
-              <label htmlFor="hasAgreement" className="text-gray-700">
-                Minulla on voimassa oleva asiakassopimus Asilo Asset Managementin kanssa
-              </label>
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tunnistautuminen</title>
+    <link rel="stylesheet" href="./styles4.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Tunnistautuminen</h1>
+        <form id="authForm">
+            <div class="info-box">
+                <p>Tehdäksesi merkinnän, sinun tulee ensin tunnistautua pankkitunnuksilla.</p>
+                <div id="errorMessage" style="display: none;" class="error-message"></div>
             </div>
-
-            <div className="flex items-start space-x-3">
-              <input
-                type="radio"
-                id="noAgreement"
-                name="customerStatus"
-                value="noAgreement"
-                className="mt-1"
-              />
-              <label htmlFor="noAgreement" className="text-gray-700">
-                Minulla ei ole voimassa olevaa sopimusta Asilo Asset Managementin kanssa
-              </label>
+            
+            <div class="form-group">
+                <div class="radio-group">
+                    <div class="radio-item">
+                        <input type="radio" id="hasAgreement" name="customerStatus" value="hasAgreement" required>
+                        <label for="hasAgreement">Minulla on voimassa oleva asiakassopimus Asilo Asset Managementin kanssa</label>
+                    </div>
+                    <div class="radio-item">
+                        <input type="radio" id="noAgreement" name="customerStatus" value="noAgreement">
+                        <label for="noAgreement">Minulla ei ole voimassa olevaa sopimusta Asilo Asset Managementin kanssa</label>
+                    </div>
+                </div>
+                
+                <button type="button" id="startAuth" class="submit-button">
+                    Tunnistaudu pankkitunnuksilla
+                </button>
             </div>
-          </div>
-
-          <div>
-            <label className="block mb-2 text-gray-700">
-              Aloita tunnistautuminen pankkitunnuksilla:
-            </label>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className={`w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium
-                hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-                disabled:opacity-50 disabled:cursor-not-allowed transition-colors`}
-            >
-              {isSubmitting ? 'Odota hetki...' : 'Tunnistaudu pankkitunnuksilla'}
-            </button>
-          </div>
-        </div>
-      </form>
+        </form>
     </div>
-  );
-};
 
-export default AuthenticationForm;
+    <script src="./index.js"></script>
+</body>
+</html>
