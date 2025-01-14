@@ -47,6 +47,7 @@ function logAuth(action, details = null) {
 // Session verification (unchanged)
 async function verifySession(token) {
     logAuth('verifySession:start', { token: token?.slice(0, 4) + '...' });
+    
     try {
         const response = await fetch(`${apiUrl}/auth/verify-session`, {
             method: 'POST',
@@ -55,7 +56,7 @@ async function verifySession(token) {
                 ...fetchConfig.headers,
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ token })  // Add token to body as well
+            body: JSON.stringify({ token })
         });
 
         logAuth('verifySession:response', {
@@ -68,14 +69,13 @@ async function verifySession(token) {
         }
 
         const data = await response.json();
-        if (!data.valid) {
+        logAuth('verifySession:data', { data });
+
+        // Important: Only redirect to index if data.valid is explicitly false
+        if (data.valid === false) {
             logAuth('verifySession:invalid', { data });
             window.location.href = 'https://sopimus.chatasilo.com/index.html';
             return false;
-        }
-
-        if (!window.location.pathname.includes('merkinta.html')) {
-            window.location.href = 'https://sopimus.chatasilo.com/merkinta.html';
         }
 
         logAuth('verifySession:success');
@@ -89,6 +89,7 @@ async function verifySession(token) {
         return false;
     }
 }
+
 
 // In merkinta.js, update the handleBankAuth function
 function handleBankAuth() {
@@ -239,6 +240,8 @@ async function checkDatabase(payload, token) {
    // Handle form submission
 
 function handleMerkintaForm() {
+    logAuth('handleMerkintaForm:start');
+    
     const elements = {
         form: document.getElementById('merkintaForm'),
         investmentTypeRadios: document.getElementsByName('investmentType'),
@@ -248,39 +251,60 @@ function handleMerkintaForm() {
         businessIDContainer: document.getElementById('businessIDContainer')
     };
 
-    // Handle auth data
+    // Handle auth data with logging
     const urlParams = new URLSearchParams(window.location.search);
     let authData = null;
     
     // Try to get auth_data from URL first
     if (urlParams.has('auth_data')) {
         try {
-            authData = JSON.parse(atob(urlParams.get('auth_data')));
-            // Store auth data in session storage as backup
+            const rawAuthData = urlParams.get('auth_data');
+            logAuth('handleMerkintaForm:authDataFromUrl', { raw: rawAuthData });
+            
+            authData = JSON.parse(atob(rawAuthData));
+            logAuth('handleMerkintaForm:parsedAuthData', { 
+                hasToken: !!authData?.sessionToken,
+                hasNIN: !!authData?.nationalIdentityNumber,
+                authenticated: authData?.authenticated
+            });
+            
+            // Store auth data in session storage
             sessionStorage.setItem('merkintaAuthData', JSON.stringify(authData));
         } catch (error) {
-            console.error('Error parsing auth_data:', error);
+            logAuth('handleMerkintaForm:authDataParseError', { error: error.message });
         }
     }
     
-    // If no auth_data in URL, try to get from session storage
+    // If no auth_data in URL, try session storage
     if (!authData) {
         try {
             const storedAuthData = sessionStorage.getItem('merkintaAuthData');
             if (storedAuthData) {
                 authData = JSON.parse(storedAuthData);
+                logAuth('handleMerkintaForm:authDataFromStorage', {
+                    hasToken: !!authData?.sessionToken,
+                    hasNIN: !!authData?.nationalIdentityNumber,
+                    authenticated: authData?.authenticated
+                });
             }
         } catch (error) {
-            console.error('Error getting auth data from session storage:', error);
+            logAuth('handleMerkintaForm:storageDataParseError', { error: error.message });
         }
+    }
+
+    // Check authentication status
+    if (!authData?.authenticated) {
+        logAuth('handleMerkintaForm:notAuthenticated');
+        window.location.href = 'index.html';
+        return;
     }
 
     // Verify session if we have token
     if (authData?.sessionToken) {
         verifySession(authData.sessionToken).catch(error => {
-            console.error('Session verification failed:', error);
-            window.location.href = 'index.html';
+            logAuth('handleMerkintaForm:sessionVerificationFailed', { error: error.message });
         });
+    }
     } else {
         // Redirect to login if no auth data
         console.error('No auth data found');
@@ -305,28 +329,31 @@ function handleMerkintaForm() {
     }
 
     // Form submission
-    if (elements.form) {
+     if (elements.form) {
         elements.form.addEventListener('submit', async function(e) {
             e.preventDefault();
+            logAuth('handleMerkintaForm:submitAttempt');
+
             const formData = new FormData(this);
             const investmentType = formData.get('investmentType');
 
             try {
-                if (!authData) {
-                    throw new Error('Authentication data not found - please log in again');
+                if (!authData?.authenticated) {
+                    throw new Error('Not authenticated');
                 }
+
+                logAuth('handleMerkintaForm:submitting', { 
+                    investmentType,
+                    hasAuthData: !!authData
+                });
 
                 let checkResult = null;
 
                 if (investmentType === 'self') {
-                    if (!authData.nationalIdentityNumber) {
-                        throw new Error('National identity number not found in authentication data');
-                    }
                     checkResult = await checkDatabase({
                         type: 'self',
-                        ssn: authData.nationalIdentityNumber
+                        ssn: authData.nationalIdentityNumber || ''
                     }, authData.sessionToken);
-
                 } else if (investmentType === 'child') {
                     if (!elements.childSSNInput.value) {
                         alert('Anna lapsen henkilötunnus');
@@ -336,7 +363,6 @@ function handleMerkintaForm() {
                         type: 'child',
                         ssn: elements.childSSNInput.value
                     }, authData.sessionToken);
-
                 } else if (investmentType === 'business') {
                     if (!elements.businessIDInput.value) {
                         alert('Anna Y-tunnus');
@@ -348,7 +374,11 @@ function handleMerkintaForm() {
                     }, authData.sessionToken);
                 }
 
-                // Store complete data in session storage
+                logAuth('handleMerkintaForm:databaseCheck', { 
+                    success: true,
+                    result: checkResult 
+                });
+
                 sessionStorage.setItem('merkintaData', JSON.stringify({
                     authData,
                     databaseCheck: checkResult,
@@ -357,13 +387,15 @@ function handleMerkintaForm() {
 
                 window.location.href = 'merkinta2.html';
             } catch (error) {
-                console.error('Error during form submission:', error);
+                logAuth('handleMerkintaForm:error', {
+                    message: error.message,
+                    stack: error.stack
+                });
                 alert('Jotain meni pieleen: ' + error.message);
             }
         });
     }
 }
-
 // Handle merkinta2.html Form
 function handleMerkinta2Form() {
    const storedData = JSON.parse(sessionStorage.getItem('merkintaData') || '{}');
