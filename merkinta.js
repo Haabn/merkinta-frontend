@@ -237,7 +237,7 @@ async function checkDatabase(payload, token) {
 
 
    // Handle form submission
-// Remove the nested handleMerkintaForm function - it's duplicated
+
 function handleMerkintaForm() {
     const elements = {
         form: document.getElementById('merkintaForm'),
@@ -250,11 +250,42 @@ function handleMerkintaForm() {
 
     // Handle auth data
     const urlParams = new URLSearchParams(window.location.search);
-    const authData = urlParams.has('auth_data') ? 
-        JSON.parse(atob(urlParams.get('auth_data'))) : null;
+    let authData = null;
+    
+    // Try to get auth_data from URL first
+    if (urlParams.has('auth_data')) {
+        try {
+            authData = JSON.parse(atob(urlParams.get('auth_data')));
+            // Store auth data in session storage as backup
+            sessionStorage.setItem('merkintaAuthData', JSON.stringify(authData));
+        } catch (error) {
+            console.error('Error parsing auth_data:', error);
+        }
+    }
+    
+    // If no auth_data in URL, try to get from session storage
+    if (!authData) {
+        try {
+            const storedAuthData = sessionStorage.getItem('merkintaAuthData');
+            if (storedAuthData) {
+                authData = JSON.parse(storedAuthData);
+            }
+        } catch (error) {
+            console.error('Error getting auth data from session storage:', error);
+        }
+    }
 
+    // Verify session if we have token
     if (authData?.sessionToken) {
-        verifySession(authData.sessionToken);
+        verifySession(authData.sessionToken).catch(error => {
+            console.error('Session verification failed:', error);
+            window.location.href = 'index.html';
+        });
+    } else {
+        // Redirect to login if no auth data
+        console.error('No auth data found');
+        window.location.href = 'index.html';
+        return;
     }
 
     // Handle investment type changes
@@ -281,12 +312,15 @@ function handleMerkintaForm() {
             const investmentType = formData.get('investmentType');
 
             try {
+                if (!authData) {
+                    throw new Error('Authentication data not found - please log in again');
+                }
+
                 let checkResult = null;
 
-                // We must pass authData.sessionToken to checkDatabase for all types:
                 if (investmentType === 'self') {
-                    if (!authData?.nationalIdentityNumber) {
-                        throw new Error('No identification data found');
+                    if (!authData.nationalIdentityNumber) {
+                        throw new Error('National identity number not found in authentication data');
                     }
                     checkResult = await checkDatabase({
                         type: 'self',
@@ -301,7 +335,7 @@ function handleMerkintaForm() {
                     checkResult = await checkDatabase({
                         type: 'child',
                         ssn: elements.childSSNInput.value
-                    }, authData?.sessionToken);
+                    }, authData.sessionToken);
 
                 } else if (investmentType === 'business') {
                     if (!elements.businessIDInput.value) {
@@ -311,9 +345,10 @@ function handleMerkintaForm() {
                     checkResult = await checkDatabase({
                         type: 'business',
                         businessId: elements.businessIDInput.value
-                    }, authData?.sessionToken);
+                    }, authData.sessionToken);
                 }
 
+                // Store complete data in session storage
                 sessionStorage.setItem('merkintaData', JSON.stringify({
                     authData,
                     databaseCheck: checkResult,
@@ -323,7 +358,7 @@ function handleMerkintaForm() {
                 window.location.href = 'merkinta2.html';
             } catch (error) {
                 console.error('Error during form submission:', error);
-                alert('Jotain meni pieleen. Yritä uudelleen.');
+                alert('Jotain meni pieleen: ' + error.message);
             }
         });
     }
