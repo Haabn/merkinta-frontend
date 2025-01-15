@@ -242,6 +242,7 @@ async function checkDatabase(payload, token) {
 function handleMerkintaForm() {
     logAuth('handleMerkintaForm:start');
     
+    // Define elements first
     const elements = {
         form: document.getElementById('merkintaForm'),
         investmentTypeRadios: document.getElementsByName('investmentType'),
@@ -251,62 +252,33 @@ function handleMerkintaForm() {
         businessIDContainer: document.getElementById('businessIDContainer')
     };
 
-    // Handle auth data with logging
-    const urlParams = new URLSearchParams(window.location.search);
-    let authData = null;
-    
-    // Try to get auth_data from URL first
-    if (urlParams.has('auth_data')) {
-        try {
-            const rawAuthData = urlParams.get('auth_data');
-            logAuth('handleMerkintaForm:authDataFromUrl', { raw: rawAuthData });
-            
-            authData = JSON.parse(atob(rawAuthData));
-            logAuth('handleMerkintaForm:parsedAuthData', { 
-                hasToken: !!authData?.sessionToken,
-                hasNIN: !!authData?.nationalIdentityNumber,
-                authenticated: authData?.authenticated
-            });
-            
-            // Store auth data in session storage
-            sessionStorage.setItem('merkintaAuthData', JSON.stringify(authData));
-        } catch (error) {
-            logAuth('handleMerkintaForm:authDataParseError', { error: error.message });
-        }
-    }
-    
-    // If no auth_data in URL, try session storage
-    if (!authData) {
-        try {
-            const storedAuthData = sessionStorage.getItem('merkintaAuthData');
-            if (storedAuthData) {
-                authData = JSON.parse(storedAuthData);
-                logAuth('handleMerkintaForm:authDataFromStorage', {
-                    hasToken: !!authData?.sessionToken,
-                    hasNIN: !!authData?.nationalIdentityNumber,
-                    authenticated: authData?.authenticated
-                });
-            }
-        } catch (error) {
-            logAuth('handleMerkintaForm:storageDataParseError', { error: error.message });
-        }
-    }
-
-    // Check authentication status
-    if (!authData?.authenticated) {
-        logAuth('handleMerkintaForm:notAuthenticated');
-        window.location.href = 'index.html';
+    // Check if form exists
+    if (!elements.form) {
+        logAuth('handleMerkintaForm:error', 'Form not found');
         return;
     }
 
-    // Verify session if we have token
-    if (authData?.sessionToken) {
-        verifySession(authData.sessionToken).catch(error => {
-            logAuth('handleMerkintaForm:sessionVerificationFailed', { error: error.message });
-        });
-    } else {
-        // Redirect to login if no auth data
-        logAuth('handleMerkintaForm:noToken');
+    // Handle authentication
+    const urlParams = new URLSearchParams(window.location.search);
+    let authData = null;
+    
+    if (urlParams.has('auth_data')) {
+        try {
+            const rawAuthData = urlParams.get('auth_data');
+            authData = JSON.parse(atob(rawAuthData));
+            logAuth('handleMerkintaForm:authData', { 
+                authenticated: authData.authenticated,
+                timestamp: authData.timestamp,
+                sessionToken: authData.sessionToken ? 'present' : 'missing'
+            });
+        } catch (error) {
+            logAuth('handleMerkintaForm:error', { error: error.message });
+        }
+    }
+
+    // Check authentication
+    if (!authData?.authenticated) {
+        logAuth('handleMerkintaForm:notAuthenticated');
         window.location.href = 'index.html';
         return;
     }
@@ -328,72 +300,71 @@ function handleMerkintaForm() {
     }
 
     // Form submission
-     if (elements.form) {
-        elements.form.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            logAuth('handleMerkintaForm:submitAttempt');
+    elements.form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        logAuth('handleMerkintaForm:submitAttempt');
 
-            const formData = new FormData(this);
-            const investmentType = formData.get('investmentType');
+        const formData = new FormData(this);
+        const investmentType = formData.get('investmentType');
 
-            try {
-                if (!authData?.authenticated) {
-                    throw new Error('Not authenticated');
-                }
-
-                logAuth('handleMerkintaForm:submitting', { 
-                    investmentType,
-                    hasAuthData: !!authData
-                });
-
-                let checkResult = null;
-
-                if (investmentType === 'self') {
-                    checkResult = await checkDatabase({
-                        type: 'self',
-                        ssn: authData.nationalIdentityNumber || ''
-                    }, authData.sessionToken);
-                } else if (investmentType === 'child') {
-                    if (!elements.childSSNInput.value) {
-                        alert('Anna lapsen henkilötunnus');
-                        return;
-                    }
-                    checkResult = await checkDatabase({
-                        type: 'child',
-                        ssn: elements.childSSNInput.value
-                    }, authData.sessionToken);
-                } else if (investmentType === 'business') {
-                    if (!elements.businessIDInput.value) {
-                        alert('Anna Y-tunnus');
-                        return;
-                    }
-                    checkResult = await checkDatabase({
-                        type: 'business',
-                        businessId: elements.businessIDInput.value
-                    }, authData.sessionToken);
-                }
-
-                logAuth('handleMerkintaForm:databaseCheck', { 
-                    success: true,
-                    result: checkResult 
-                });
-
-                sessionStorage.setItem('merkintaData', JSON.stringify({
-                    authData,
-                    databaseCheck: checkResult,
-                    formData: Object.fromEntries(formData)
-                }));
-
-                window.location.href = 'merkinta2.html';
-            } catch (error) {
-                logAuth('handleMerkintaForm:error', {
-                    message: error.message,
-                    stack: error.stack
-                });
-                alert('Jotain meni pieleen: ' + error.message);
+        try {
+            if (!authData?.authenticated) {
+                throw new Error('Not authenticated');
             }
-        });
-    }
+
+            logAuth('handleMerkintaForm:submitting', { 
+                investmentType,
+                hasAuthData: !!authData,
+                hasSessionToken: !!authData.sessionToken
+            });
+
+            let checkResult = null;
+
+            if (investmentType === 'self') {
+                checkResult = await checkDatabase({
+                    type: 'self',
+                    ssn: authData.nationalIdentityNumber || ''
+                }, authData.sessionToken);
+            } else if (investmentType === 'child') {
+                if (!elements.childSSNInput.value) {
+                    alert('Anna lapsen henkilötunnus');
+                    return;
+                }
+                checkResult = await checkDatabase({
+                    type: 'child',
+                    ssn: elements.childSSNInput.value
+                }, authData.sessionToken);
+            } else if (investmentType === 'business') {
+                if (!elements.businessIDInput.value) {
+                    alert('Anna Y-tunnus');
+                    return;
+                }
+                checkResult = await checkDatabase({
+                    type: 'business',
+                    businessId: elements.businessIDInput.value
+                }, authData.sessionToken);
+            }
+
+            logAuth('handleMerkintaForm:databaseCheck', { 
+                success: true,
+                result: checkResult 
+            });
+
+            sessionStorage.setItem('merkintaData', JSON.stringify({
+                authData,
+                databaseCheck: checkResult,
+                formData: Object.fromEntries(formData)
+            }));
+
+            window.location.href = 'merkinta2.html';
+        } catch (error) {
+            logAuth('handleMerkintaForm:error', {
+                message: error.message,
+                stack: error.stack
+            });
+            alert('Jotain meni pieleen: ' + error.message);
+        }
+    });
 }
 // Handle merkinta2.html Form
 function handleMerkinta2Form() {
