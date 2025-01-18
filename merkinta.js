@@ -7,6 +7,7 @@ const fetchConfig = {
         'Accept': 'application/json'
     }
 };
+let authData = null;
 
 function handleAuthError(button) {
     button.disabled = false;
@@ -148,7 +149,31 @@ function handleBankAuth() {
         }
     });
 }
-
+function parseAuthData() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const authDataParam = urlParams.get('auth_data');
+    
+    if (authDataParam) {
+        try {
+            // Decode base64 auth data
+            const decodedData = atob(authDataParam);
+            authData = JSON.parse(decodedData);
+            logAuth('parseAuthData:success', { 
+                authenticated: authData.authenticated,
+                hasToken: !!authData.sessionToken
+            });
+        } catch (error) {
+            logAuth('parseAuthData:error', { 
+                message: error.message,
+                stack: error.stack 
+            });
+            window.location.href = 'https://sopimus.chatasilo.com/index.html';
+        }
+    } else {
+        logAuth('parseAuthData:noData');
+        window.location.href = 'https://sopimus.chatasilo.com/index.html';
+    }
+}
 // Encryption & Submission Logic
 function encryptDataForTransmission(dataToEncrypt) {
     const aesKey = forge.random.getBytesSync(16);
@@ -278,10 +303,11 @@ function handleMerkintaForm() {
                 let checkResult = null;
 
                 if (investmentType === 'self') {
-                    checkResult = await checkDatabase({
-                        type: 'self',
-                        ssn: authData.nationalIdentityNumber || ''
-                    }, authData.sessionToken);
+                checkResult = await checkDatabase({
+                type: 'self'
+                // No SSN needed - backend will lookup using sessionToken
+                }, authData.sessionToken);
+                
                 } else if (investmentType === 'child') {
                     if (!elements.childSSNInput.value) {
                         alert('Anna lapsen henkilötunnus');
