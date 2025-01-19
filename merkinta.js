@@ -157,21 +157,33 @@ function parseAuthData() {
         try {
             // Decode base64 auth data
             const decodedData = atob(authDataParam);
-            authData = JSON.parse(decodedData);
+            const parsedData = JSON.parse(decodedData);
+            
+            // Validate the parsed data has required fields
+            if (!parsedData.authenticated || !parsedData.sessionToken) {
+                throw new Error('Invalid authentication data');
+            }
+            
+            authData = parsedData;
             logAuth('parseAuthData:success', { 
                 authenticated: authData.authenticated,
-                hasToken: !!authData.sessionToken
+                hasToken: !!authData.sessionToken,
+                timestamp: authData.timestamp
             });
+            
+            return true;
         } catch (error) {
             logAuth('parseAuthData:error', { 
                 message: error.message,
                 stack: error.stack 
             });
             window.location.href = 'https://sopimus.chatasilo.com/index.html';
+            return false;
         }
     } else {
         logAuth('parseAuthData:noData');
         window.location.href = 'https://sopimus.chatasilo.com/index.html';
+        return false;
     }
 }
 // Encryption & Submission Logic
@@ -461,6 +473,12 @@ function handleMerkintaForm() {
 document.addEventListener('DOMContentLoaded', function () {
     const currentPage = window.location.pathname.split('/').pop();
 
+    // Parse auth data for any page that needs authentication
+    if (currentPage === 'merkinta.html' || currentPage === 'merkinta2.html') {
+        parseAuthData();  // Parse the auth data first
+    }
+
+    // Then initialize the appropriate page handler
     if (currentPage === 'index.html' || currentPage === '') {
         handleBankAuth();
     } else if (currentPage === 'merkinta.html') {
@@ -469,6 +487,7 @@ document.addEventListener('DOMContentLoaded', function () {
         handleMerkinta2Form();
     }
 });
+
 
 
 
