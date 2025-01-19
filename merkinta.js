@@ -1,4 +1,5 @@
 const apiUrl = 'https://api.chatasilo.com';
+const MAX_STORAGE_TIME = 30 * 60 * 1000; // 30 minutes timeout
 const fetchConfig = {
     credentials: 'include',
     mode: 'cors',
@@ -29,7 +30,6 @@ function createErrorElement(button) {
     return errorDiv;
 }
 
-// Logging utility
 function logAuth(action, details = null) {
     const timestamp = new Date().toISOString();
     const logData = {
@@ -39,51 +39,6 @@ function logAuth(action, details = null) {
         url: window.location.href
     };
     console.log('[Auth]', JSON.stringify(logData));
-}
-
-// Session verification
-async function verifySession(token) {
-    logAuth('verifySession:start', { token: token?.slice(0, 4) + '...' });
-    
-    try {
-        const response = await fetch(`${apiUrl}/auth/verify-session`, {
-            method: 'POST',
-            ...fetchConfig,
-            headers: {
-                ...fetchConfig.headers,
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ token })
-        });
-
-        logAuth('verifySession:response', {
-            status: response.status,
-            statusText: response.statusText
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        logAuth('verifySession:data', { data });
-
-        if (data.valid === false) {
-            logAuth('verifySession:invalid', { data });
-            window.location.href = 'https://sopimus.chatasilo.com/index.html';
-            return false;
-        }
-
-        logAuth('verifySession:success');
-        return true;
-    } catch (error) {
-        logAuth('verifySession:error', {
-            message: error.message,
-            stack: error.stack,
-        });
-        window.location.href = 'https://sopimus.chatasilo.com/index.html';
-        return false;
-    }
 }
 
 function handleBankAuth() {
@@ -149,26 +104,30 @@ function handleBankAuth() {
         }
     });
 }
+
 function parseAuthData() {
     const urlParams = new URLSearchParams(window.location.search);
     const authDataParam = urlParams.get('auth_data');
     
     if (authDataParam) {
         try {
-            // Decode base64 auth data
             const decodedData = atob(authDataParam);
             const parsedData = JSON.parse(decodedData);
             
-            // Validate the parsed data has required fields
             if (!parsedData.authenticated || !parsedData.sessionToken) {
                 throw new Error('Invalid authentication data');
             }
             
-            authData = parsedData;
+            authData = {
+                ...parsedData,
+                storedAt: new Date().getTime() // Add timestamp for timeout tracking
+            };
+            
             logAuth('parseAuthData:success', { 
                 authenticated: authData.authenticated,
                 hasToken: !!authData.sessionToken,
-                timestamp: authData.timestamp
+                timestamp: authData.timestamp,
+                storedAt: authData.storedAt
             });
             
             return true;
@@ -186,7 +145,7 @@ function parseAuthData() {
         return false;
     }
 }
-// Encryption & Submission Logic
+
 function encryptDataForTransmission(dataToEncrypt) {
     const aesKey = forge.random.getBytesSync(16);
     const aesIV = forge.random.getBytesSync(16);
@@ -267,6 +226,13 @@ async function checkDatabase(payload, token) {
 }
 
 function handleMerkintaForm() {
+    // Check timeout first
+    if (!authData?.storedAt || (Date.now() - authData.storedAt > MAX_STORAGE_TIME)) {
+        logAuth('handleMerkintaForm:timeout');
+        window.location.href = 'https://sopimus.chatasilo.com/index.html';
+        return;
+    }
+
     const elements = {
         form: document.getElementById('merkintaForm'),
         childSSNContainer: document.getElementById('childSSNContainer'),
@@ -276,7 +242,6 @@ function handleMerkintaForm() {
         investmentTypeRadios: document.getElementsByName('investmentType')
     };
 
-    // Handle investment type changes
     if (elements.investmentTypeRadios) {
         elements.investmentTypeRadios.forEach(radio => {
             radio.addEventListener('change', function() {
@@ -292,11 +257,17 @@ function handleMerkintaForm() {
         });
     }
 
-    // Form submission
     if (elements.form) {
         elements.form.addEventListener('submit', async function(e) {
             e.preventDefault();
             logAuth('handleMerkintaForm:submitAttempt');
+
+            // Check timeout again before submission
+            if (Date.now() - authData.storedAt > MAX_STORAGE_TIME) {
+                logAuth('handleMerkintaForm:timeoutDuringSubmission');
+                window.location.href = 'https://sopimus.chatasilo.com/index.html';
+                return;
+            }
 
             const formData = new FormData(this);
             const investmentType = formData.get('investmentType');
@@ -315,11 +286,9 @@ function handleMerkintaForm() {
                 let checkResult = null;
 
                 if (investmentType === 'self') {
-                checkResult = await checkDatabase({
-                type: 'self'
-                // No SSN needed - backend will lookup using sessionToken
-                }, authData.sessionToken);
-                
+                    checkResult = await checkDatabase({
+                        type: 'self'
+                    }, authData.sessionToken);
                 } else if (investmentType === 'child') {
                     if (!elements.childSSNInput.value) {
                         alert('Anna lapsen henkilötunnus');
@@ -345,8 +314,9 @@ function handleMerkintaForm() {
                     result: checkResult 
                 });
 
+                // Store with timeout information
                 sessionStorage.setItem('merkintaData', JSON.stringify({
-                    authData,
+                    authData,  // includes storedAt timestamp
                     databaseCheck: checkResult,
                     formData: Object.fromEntries(formData)
                 }));
@@ -362,111 +332,123 @@ function handleMerkintaForm() {
         });
     }
 }
+function handleMerkinta2Form() {
+    const storedData = JSON.parse(sessionStorage.getItem('merkintaData') || '{}');
+    
+    // Check both stored data and timeout
+    if (!storedData.formData || !storedData.authData?.storedAt || 
+        (Date.now() - storedData.authData.storedAt > MAX_STORAGE_TIME)) {
+        logAuth('handleMerkinta2Form:timeout');
+        sessionStorage.removeItem('merkintaData');
+        window.location.href = 'https://sopimus.chatasilo.com/index.html';
+        return;
+    }
 
-    function handleMerkinta2Form() {
-   const storedData = JSON.parse(sessionStorage.getItem('merkintaData') || '{}');
-   if (!storedData.formData) {
-       window.location.href = 'merkinta.html';
-       return;
-   }
+    const { formData, databaseCheck, authData } = storedData;
+    const investmentType = formData.investmentType;
 
-   const { formData, databaseCheck, authData } = storedData;
-   const investmentType = formData.investmentType;
+    const elements = {
+        form: document.getElementById('merkintaForm2'),
+        childAdditionalInfoContainer: document.getElementById('childAdditionalInfoContainer'),
+        businessAdditionalInfoContainer: document.getElementById('additionalInfoContainer'),
+        selfAdditionalInfoContainer: document.getElementById('selfAdditionalInfoContainer'),
+        id3rRadios: document.getElementsByName('id3r'),
+        id3Container: document.getElementById('id3Container'),
+        merkintaSumma: document.getElementById('merkintaSumma'),
+        summaError: document.getElementById('summaError')
+    };
 
-   const elements = {
-       form: document.getElementById('merkintaForm2'),
-       childAdditionalInfoContainer: document.getElementById('childAdditionalInfoContainer'),
-       businessAdditionalInfoContainer: document.getElementById('additionalInfoContainer'),
-       selfAdditionalInfoContainer: document.getElementById('selfAdditionalInfoContainer'),
-       id3rRadios: document.getElementsByName('id3r'),
-       id3Container: document.getElementById('id3Container'),
-       merkintaSumma: document.getElementById('merkintaSumma'),
-       summaError: document.getElementById('summaError')
-   };
+    // Show/hide additional info based on DB check result
+    if (databaseCheck) {
+        if (investmentType === 'self') {
+            elements.selfAdditionalInfoContainer.style.display = databaseCheck.found ? 'none' : 'block';
+            if (databaseCheck.found && databaseCheck.data) {
+                Object.keys(databaseCheck.data).forEach(key => {
+                    const input = document.querySelector(`input[name="${key}"]`);
+                    if (input) input.value = databaseCheck.data[key];
+                });
+            }
+        } else if (investmentType === 'child') {
+            elements.childAdditionalInfoContainer.style.display = databaseCheck.found ? 'none' : 'block';
+            if (databaseCheck.found && databaseCheck.data) {
+                Object.keys(databaseCheck.data).forEach(key => {
+                    const input = document.querySelector(`input[name="${key}"]`);
+                    if (input) input.value = databaseCheck.data[key];
+                });
+            }
+        } else if (investmentType === 'business') {
+            elements.businessAdditionalInfoContainer.style.display = databaseCheck.found ? 'none' : 'block';
+            if (databaseCheck.found && databaseCheck.data) {
+                Object.keys(databaseCheck.data).forEach(key => {
+                    const input = document.querySelector(`input[name="${key}"]`);
+                    if (input) input.value = databaseCheck.data[key];
+                });
+            }
+        }
+    }
 
-   // Show/hide additional info based on DB check result
-   if (databaseCheck) {
-       if (investmentType === 'self') {
-           elements.selfAdditionalInfoContainer.style.display = databaseCheck.found ? 'none' : 'block';
-           if (databaseCheck.found && databaseCheck.data) {
-               Object.keys(databaseCheck.data).forEach(key => {
-                   const input = document.querySelector(`input[name="${key}"]`);
-                   if (input) input.value = databaseCheck.data[key];
-               });
-           }
-       } else if (investmentType === 'child') {
-           elements.childAdditionalInfoContainer.style.display = databaseCheck.found ? 'none' : 'block';
-           if (databaseCheck.found && databaseCheck.data) {
-               Object.keys(databaseCheck.data).forEach(key => {
-                   const input = document.querySelector(`input[name="${key}"]`);
-                   if (input) input.value = databaseCheck.data[key];
-               });
-           }
-       } else if (investmentType === 'business') {
-           elements.businessAdditionalInfoContainer.style.display = databaseCheck.found ? 'none' : 'block';
-           if (databaseCheck.found && databaseCheck.data) {
-               Object.keys(databaseCheck.data).forEach(key => {
-                   const input = document.querySelector(`input[name="${key}"]`);
-                   if (input) input.value = databaseCheck.data[key];
-               });
-           }
-       }
-   }
+    // Additional account ownership info 
+    if (elements.id3rRadios) {
+        elements.id3rRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                elements.id3Container.style.display = this.value === 'joo' ? 'block' : 'none';
+            });
+        });
+    }
 
-   // Additional account ownership info 
-   if (elements.id3rRadios) {
-       elements.id3rRadios.forEach(radio => {
-           radio.addEventListener('change', function() {
-               elements.id3Container.style.display = this.value === 'joo' ? 'block' : 'none';
-           });
-       });
-   }
+    // Submit final data
+    if (elements.form) {
+        elements.form.addEventListener('submit', async function(e) {
+            e.preventDefault();
 
-   // Submit final data
-   if (elements.form) {
-       elements.form.addEventListener('submit', async function(e) {
-           e.preventDefault();
+            // Check timeout before submission
+            if (Date.now() - storedData.authData.storedAt > MAX_STORAGE_TIME) {
+                logAuth('handleMerkinta2Form:timeoutDuringSubmission');
+                sessionStorage.removeItem('merkintaData');
+                window.location.href = 'https://sopimus.chatasilo.com/index.html';
+                return;
+            }
 
-           // Validate merkintä amount
-           const amount = parseFloat(elements.merkintaSumma.value);
-           if (Math.abs(amount) < 1000) {
-               elements.summaError.style.display = 'block';
-               return;
-           }
+            // Validate merkintä amount
+            const amount = parseFloat(elements.merkintaSumma.value);
+            if (Math.abs(amount) < 1000) {
+                elements.summaError.style.display = 'block';
+                return;
+            }
 
-           try {
-               // Gather final form data
-               const finalFormData = new FormData(this);
-               finalFormData.append('investmentType', investmentType);
+            try {
+                // Gather final form data
+                const finalFormData = new FormData(this);
+                finalFormData.append('investmentType', investmentType);
 
-               if (investmentType === 'self' && authData) {
-                   finalFormData.append('nationalIdentityNumber', authData.nationalIdentityNumber);
-                   finalFormData.append('name', authData.name);
-               }
+                if (investmentType === 'self' && authData) {
+                    finalFormData.append('nationalIdentityNumber', authData.nationalIdentityNumber);
+                    finalFormData.append('name', authData.name);
+                }
 
-               // If DB data found, fill in any missing fields
-               if (databaseCheck?.found && databaseCheck.data) {
-                   Object.entries(databaseCheck.data).forEach(([key, value]) => {
-                       if (!finalFormData.has(key)) {
-                           finalFormData.append(key, value);
-                       }
-                   });
-               }
+                // If DB data found, fill in any missing fields
+                if (databaseCheck?.found && databaseCheck.data) {
+                    Object.entries(databaseCheck.data).forEach(([key, value]) => {
+                        if (!finalFormData.has(key)) {
+                            finalFormData.append(key, value);
+                        }
+                    });
+                }
 
-               // Pass token here, too
-               const response = await submitFormData(finalFormData, authData?.sessionToken);
-               if (response.status === 'success') {
-                   sessionStorage.removeItem('merkintaData');
-                   window.location.href = 'page12.html';
-               } else {
-                   throw new Error(response.message || 'Submission failed');
-               }
-           } catch (error) {
-               console.error('Error:', error);
-               alert('Virhe lomakkeen lähetyksessä: ' + error.message);
-           }
-       });
-   }
+                // Pass token here, too
+                const response = await submitFormData(finalFormData, authData?.sessionToken);
+                if (response.status === 'success') {
+                    sessionStorage.removeItem('merkintaData'); // Clean up stored data
+                    window.location.href = 'page12.html';
+                } else {
+                    throw new Error(response.message || 'Submission failed');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Virhe lomakkeen lähetyksessä: ' + error.message);
+            }
+        });
+    }
 }
 
 // DOM load
@@ -487,9 +469,3 @@ document.addEventListener('DOMContentLoaded', function () {
         handleMerkinta2Form();
     }
 });
-
-
-
-
-
-
