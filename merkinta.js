@@ -333,7 +333,15 @@ function handleMerkintaForm() {
     }
 }
 function handleMerkinta2Form() {
+    
     const storedData = JSON.parse(sessionStorage.getItem('merkintaData') || '{}');
+    console.log('Debug stored data:', {
+        hasFormData: !!storedData.formData,
+        hasAuthData: !!storedData.authData,
+        storedAt: storedData.authData?.storedAt,
+        timeDiff: Date.now() - (storedData.authData?.storedAt || 0),
+        maxTime: MAX_STORAGE_TIME
+    });
     
     // Check both stored data and timeout
     if (!storedData.formData || !storedData.authData?.storedAt || 
@@ -451,21 +459,16 @@ function handleMerkinta2Form() {
     }
 }
 
-// DOM load
 document.addEventListener('DOMContentLoaded', function () {
     const currentPage = window.location.pathname.split('/').pop();
 
-    // Parse auth data for any page that needs authentication
-    if (currentPage === 'merkinta.html' || currentPage === 'merkinta2.html') {
-        parseAuthData();  // Parse the auth data first
-    }
-
-    // Then initialize the appropriate page handler
     if (currentPage === 'index.html' || currentPage === '') {
         handleBankAuth();
     } else if (currentPage === 'merkinta.html') {
+        parseAuthData();  // Parse URL auth data
         handleMerkintaForm();
     } else if (currentPage === 'merkinta2.html') {
+        // Don't parse URL auth data again for merkinta2, use stored data only
         handleMerkinta2Form();
     }
 });
