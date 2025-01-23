@@ -184,13 +184,17 @@ eG3Ma507zr8c5DYyhTzX/F3/o2CjtYhl6cHy2UUbMKdglgZrZDT/WQWZnaDFUm3t
 }
 
 async function submitFormData(formData, token) {
+    const logs = [];
     const formDataObj = {};
+    
     for (const [key, value] of formData.entries()) {
         formDataObj[key] = value;
-        console.log(`${key}: ${value}`);  // Log each field
+        logs.push(`Field: ${key} = ${value}`);
     }
-    console.log('Complete FormData object:', formDataObj);  // Log full object
+    logs.push('Complete FormData: ' + JSON.stringify(formDataObj, null, 2));
+    
     const encryptedData = encryptDataForTransmission(formDataObj);
+    logs.push('Encrypted data: ' + JSON.stringify(encryptedData, null, 2));
     
     const response = await fetch(`${apiUrl}/merkinta/decrypt`, {
         method: 'POST',
@@ -201,9 +205,11 @@ async function submitFormData(formData, token) {
         credentials: 'include',
         body: JSON.stringify(encryptedData)
     });
-    console.log('Response:', response);
+    
     const responseData = await response.json();
-    console.log('Decrypted response data:', responseData);
+    logs.push('Response data: ' + JSON.stringify(responseData, null, 2));
+    
+    console.log('COMPLETE LOG:\n' + logs.join('\n'));
     return responseData;
 }
 
