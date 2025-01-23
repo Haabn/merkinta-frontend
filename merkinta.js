@@ -184,24 +184,23 @@ eG3Ma507zr8c5DYyhTzX/F3/o2CjtYhl6cHy2UUbMKdglgZrZDT/WQWZnaDFUm3t
 }
 
 async function submitFormData(formData, token) {
+    console.log('Submitting form data:', formData);
+    console.log('Using token:', token);
+
     const formDataObj = Object.fromEntries(formData.entries());
     const encryptedData = encryptDataForTransmission(formDataObj);
-
+    
     const response = await fetch(`${apiUrl}/merkinta/decrypt`, {
         method: 'POST',
         headers: {
             'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            'Content-Type': 'application/json'
         },
         credentials: 'include',
         body: JSON.stringify(encryptedData)
     });
-
-    if (!response.ok) {
-        throw new Error('Backend request failed');
-    }
-
+    
+    console.log('Response:', response);
     return response.json();
 }
 
