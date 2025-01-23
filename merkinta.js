@@ -225,9 +225,7 @@ async function checkDatabase(payload, token) {
 }
 
 function handleMerkintaForm() {
-    // Check timeout first
     if (!authData?.storedAt || (Date.now() - authData.storedAt > MAX_STORAGE_TIME)) {
-        logAuth('handleMerkintaForm:timeout');
         window.location.href = 'https://sopimus.chatasilo.com/index.html';
         return;
     }
@@ -241,95 +239,46 @@ function handleMerkintaForm() {
         investmentTypeRadios: document.getElementsByName('investmentType')
     };
 
-    if (elements.investmentTypeRadios) {
-        elements.investmentTypeRadios.forEach(radio => {
-            radio.addEventListener('change', function() {
-                elements.childSSNContainer.style.display = 'none';
-                elements.businessIDContainer.style.display = 'none';
-
-                if (this.value === 'child') {
-                    elements.childSSNContainer.style.display = 'block';
-                } else if (this.value === 'business') {
-                    elements.businessIDContainer.style.display = 'block';
-                }
-            });
+    elements.investmentTypeRadios?.forEach(radio => {
+        radio.addEventListener('change', function() {
+            elements.childSSNContainer.style.display = 'none';
+            elements.businessIDContainer.style.display = 'none';
+            if (this.value === 'child') elements.childSSNContainer.style.display = 'block';
+            if (this.value === 'business') elements.businessIDContainer.style.display = 'block';
         });
-    }
+    });
 
-    if (elements.form) {
-        elements.form.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            logAuth('handleMerkintaForm:submitAttempt');
+    elements.form?.addEventListener('submit', async function(e) {
+        e.preventDefault();
 
-            // Check timeout again before submission
-            if (Date.now() - authData.storedAt > MAX_STORAGE_TIME) {
-                logAuth('handleMerkintaForm:timeoutDuringSubmission');
-                window.location.href = 'https://sopimus.chatasilo.com/index.html';
-                return;
-            }
+        if (Date.now() - authData.storedAt > MAX_STORAGE_TIME) {
+            window.location.href = 'https://sopimus.chatasilo.com/index.html';
+            return;
+        }
 
-            const formData = new FormData(this);
-            const investmentType = formData.get('investmentType');
+        const formData = new FormData(this);
+        const investmentType = formData.get('investmentType');
 
-            try {
-                if (!authData?.authenticated) {
-                    throw new Error('Not authenticated');
-                }
+        try {
+            if (!authData?.authenticated) throw new Error('Not authenticated');
 
-                logAuth('handleMerkintaForm:submitting', { 
-                    investmentType,
-                    hasAuthData: !!authData,
-                    hasSessionToken: !!authData.sessionToken
-                });
+            const checkResult = await checkDatabase({
+                type: investmentType,
+                ssn: investmentType === 'child' ? elements.childSSNInput.value : undefined,
+                businessId: investmentType === 'business' ? elements.businessIDInput.value : undefined
+            }, authData.sessionToken);
 
-                let checkResult = null;
+            sessionStorage.setItem('merkintaData', JSON.stringify({
+                sessionToken: checkResult.sessionToken,
+                found: checkResult.found,
+                investmentType
+            }));
 
-                if (investmentType === 'self') {
-                    checkResult = await checkDatabase({
-                        type: 'self'
-                    }, authData.sessionToken);
-                } else if (investmentType === 'child') {
-                    if (!elements.childSSNInput.value) {
-                        alert('Anna lapsen henkilötunnus');
-                        return;
-                    }
-                    checkResult = await checkDatabase({
-                        type: 'child',
-                        ssn: elements.childSSNInput.value
-                    }, authData.sessionToken);
-                } else if (investmentType === 'business') {
-                    if (!elements.businessIDInput.value) {
-                        alert('Anna Y-tunnus');
-                        return;
-                    }
-                    checkResult = await checkDatabase({
-                        type: 'business',
-                        businessId: elements.businessIDInput.value
-                    }, authData.sessionToken);
-                }
-
-                logAuth('handleMerkintaForm:databaseCheck', { 
-                    success: true,
-                    result: checkResult 
-                });
-
-                // Store with timeout information
-                sessionStorage.setItem('merkintaData', JSON.stringify({
-                    authData,  // includes storedAt timestamp
-                    databaseCheck: checkResult,
-                    formData: Object.fromEntries(formData)
-                }));
-
-                window.location.href = 'merkinta2.html';
-            } catch (error) {
-                logAuth('handleMerkintaForm:error', {
-                    message: error.message,
-                    stack: error.stack
-                });
-                alert('Jotain meni pieleen: ' + error.message);
-            }
-        });
-    }
+            window.location.href = 'merkinta2.html';
+        } catch (error) {
+            alert('Error: ' + error.message);
+        }
+    });
 }
 function handleMerkinta2Form() {
     
