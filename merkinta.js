@@ -187,26 +187,24 @@ async function submitFormData(formData, token) {
     const formDataObj = {};
     for (const [key, value] of formData.entries()) {
         formDataObj[key] = value;
+        console.log(`${key}: ${value}`);  // Log each field
     }
-    console.log('FormData object:', formDataObj);
+    console.log('Complete FormData object:', formDataObj);  // Log full object
     const encryptedData = encryptDataForTransmission(formDataObj);
     
-   const response = await fetch(`${apiUrl}/merkinta/decrypt`, {
-    method: 'POST',
-    headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-    },
-    credentials: 'include',
-    body: JSON.stringify(encryptedData)
-});
-
-console.log('Response:', response);
-const responseData = await response.json();
-console.log('Decrypted response data:', responseData);
-return responseData;
-    
-    
+    const response = await fetch(`${apiUrl}/merkinta/decrypt`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify(encryptedData)
+    });
+    console.log('Response:', response);
+    const responseData = await response.json();
+    console.log('Decrypted response data:', responseData);
+    return responseData;
 }
 
 async function checkDatabase(payload, token) {
