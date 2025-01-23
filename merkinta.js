@@ -271,7 +271,11 @@ function handleMerkintaForm() {
             sessionStorage.setItem('merkintaData', JSON.stringify({
                 sessionToken: checkResult.sessionToken,
                 found: checkResult.found,
-                investmentType
+                investmentType,
+                authData: {
+                storedAt: authData.storedAt,  // For timeout check
+                sessionToken: authData.sessionToken
+                }
             }));
 
             window.location.href = 'merkinta2.html';
