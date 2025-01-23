@@ -1,5 +1,6 @@
 const apiUrl = 'https://api.chatasilo.com';
 const MAX_STORAGE_TIME = 30 * 60 * 1000; // 30 minutes timeout
+const { investmentType, found, authData } = storedData;
 const fetchConfig = {
     credentials: 'include',
     mode: 'cors',
@@ -296,7 +297,7 @@ function handleMerkinta2Form() {
     });
     
     // Check both stored data and timeout
-    if (!storedData.formData || !storedData.authData?.storedAt || 
+   if (!storedData.investmentType || !storedData.authData?.storedAt...)
         (Date.now() - storedData.authData.storedAt > MAX_STORAGE_TIME)) {
         logAuth('handleMerkinta2Form:timeout');
         sessionStorage.removeItem('merkintaData');
