@@ -184,11 +184,11 @@ eG3Ma507zr8c5DYyhTzX/F3/o2CjtYhl6cHy2UUbMKdglgZrZDT/WQWZnaDFUm3t
 }
 
 async function submitFormData(formData, token) {
-    console.log('Submitting form data:', formData);
-    console.log('Using token:', token);
-
-    const formDataObj = Object.fromEntries(formData.entries());
-    console.log('Raw form data:', Object.fromEntries(formData.entries()));
+    const formDataObj = {};
+    for (const [key, value] of formData.entries()) {
+        formDataObj[key] = value;
+    }
+    console.log('FormData object:', formDataObj);
     const encryptedData = encryptDataForTransmission(formDataObj);
     
    const response = await fetch(`${apiUrl}/merkinta/decrypt`, {
