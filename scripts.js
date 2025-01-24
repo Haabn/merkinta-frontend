@@ -24,7 +24,16 @@ window.addEventListener('warning', function(e) {
 // Main script for handling form encryption and navigation
 document.addEventListener('DOMContentLoaded', function() {
     console.log("scripts.js loaded successfully.");
-    
+
+function getAuthToken() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const authData = urlParams.get('auth_data');
+    if (authData) {
+        const decodedData = JSON.parse(atob(authData));
+        return decodedData.sessionToken;
+    }
+    return null;
+}
 
 // DOM Elements - Common across all pages
 const outputDiv = document.getElementById('outputDiv');
@@ -156,85 +165,9 @@ const page3Elements = {
     form: document.getElementById('page3Form')
 };
 
-function checkSession() {
-    const currentPage = window.location.pathname;
-    
-    // Array of protected pages that need session
-    const protectedPages = [
-        'page1a.html',
-        'page1b.html',
-        'page2a.html',
-        'page2b.html',
-        'page2c.html',
-        'page2d.html',
-        'page3.html'
-    ];
 
-    // Check if current page needs session
-    if (protectedPages.some(page => currentPage.includes(page))) {
-        // First check consent
-        const hasConsent = sessionStorage.getItem('privacyConsent');
-        if (!hasConsent) {
-            console.error('No privacy consent found');
-            window.location.href = 'page0.html';
-            return;
-        }
-
-        // Then check session for pages after page0
-        const storedSessionId = sessionStorage.getItem('formSessionId');
-        if (!storedSessionId && !currentPage.includes('page1a.html')) {
-            console.error('No valid session found');
-            window.location.href = 'page1a.html';
-        }
-    }
-}
-function handleSessionResponse(responseData, step) {
-    // Handle session ID if provided by server
-    if (responseData.sessionId) {
-        sessionStorage.setItem('formSessionId', responseData.sessionId);
-    }
-    
-    // Handle navigation if server provides next page
-    if (responseData.nextPage) {
-        window.location.href = responseData.nextPage;
-    }
-}
 // Define the function at the top of your script
-function generateSessionId() {
-    return 'session-' + Date.now() + '-' + Math.floor(Math.random() * 1000000);
-  }
-  
-  if (window.location.pathname.includes('page0.html')) {
-    const page0Form = document.getElementById('page0Form');
-  
-    if (page0Form && page0Elements.consentCheckbox && page0Elements.proceedButton) {
-      // Handle checkbox change
-      page0Elements.consentCheckbox.addEventListener('change', function() {
-        page0Elements.proceedButton.disabled = !this.checked;
-      });
-  
-      // Handle form submission
-      page0Form.addEventListener('submit', function(e) {
-        e.preventDefault();
-  
-        if (page0Elements.consentCheckbox.checked) {
-          // Record the consent timestamp
-          const consentTimestamp = new Date().toISOString();
-          sessionStorage.setItem('privacyConsent', consentTimestamp);
-  
-          // Generate a new session ID and store it in sessionStorage
-          const sessionId = generateSessionId();
-          sessionStorage.setItem('formSessionId', sessionId);
-  
-          // Collect form data
-          const formData = new FormData(this);
-  
-          // Use the same session ID for encryption
-          performEncryption(formData, sessionId);
-        }
-      });
-    }
-  }
+
    // Page1a Handler Functions
    function handleCheckboxChange(checkedBox, otherCheckbox) {
     if (checkedBox.checked) {
@@ -773,6 +706,10 @@ function createFormDataObject(formData) {
     // Encryption and Submission Functions
     async function performEncryption(formData, type = 'form') {
         try {
+            const authToken = getAuthToken();
+        if (!authToken) {
+            throw new Error('Authentication token missing');
+            }
             // Show loading and hide output
             if (loadingSection) loadingSection.classList.remove('hidden');
             if (outputSection) outputSection.classList.add('hidden');
@@ -844,19 +781,21 @@ function createFormDataObject(formData) {
                 encryptedKeyRSA: encryptedAESKeyRSA,
                 iv: aesIVHex,
                 step: step,
-                sessionId: sessionId
             };
     
             console.log("Sending payload to backend:", payload);
-    
+
+            const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${sessionId}`  // Use Signicat session token
+};
+            
             // Send to backend
-            const API_URL = 'https://artistic-terrier-boss.ngrok-free.app';
+            const API_URL = 'https://api.chatasilo.com/sopimus-api/consent';
             const response = await fetch(`${API_URL}/decrypt`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
+            method: 'POST',
+            headers,
+            body: JSON.stringify(payload)
             });
     
             if (!response.ok) {
