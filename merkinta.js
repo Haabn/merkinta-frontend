@@ -182,16 +182,17 @@ eG3Ma507zr8c5DYyhTzX/F3/o2CjtYhl6cHy2UUbMKdglgZrZDT/WQWZnaDFUm3t
         iv: aesIVHex
     };
 }
-
 async function submitFormData(formData, token) {
     const logs = [];
     const formDataObj = {};
     
     for (const [key, value] of formData.entries()) {
-        formDataObj[key] = value;
-        logs.push(`Field: ${key} = ${value}`);
+        if (value.trim() !== '') {  // Only keep non-empty values
+            formDataObj[key] = value;
+            logs.push(`Field: ${key} = ${value}`);
+        }
     }
-    logs.push('Complete FormData: ' + JSON.stringify(formDataObj, null, 2));
+    logs.push('Clean FormData: ' + JSON.stringify(formDataObj, null, 2));
     
     const encryptedData = encryptDataForTransmission(formDataObj);
     logs.push('Encrypted data: ' + JSON.stringify(encryptedData, null, 2));
