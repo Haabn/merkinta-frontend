@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asilo Asset Management - Tietosuojaseloste ja Suostumus</title>
+    <!-- Link to Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Link to External CSS File -->
+    <link rel="stylesheet" href="styles0.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/forge/0.10.0/forge.min.js"></script>
+    
+</head>
+<body>
+
+    <!-- Header Section -->
+    <header>
+        <h1>Asilo Asset Management</h1>
+        <h2>Tietosuojaseloste ja Suostumus</h2>
+    </header>
+    <div class="confirmation-box">
+        <div class="security-info">
+            <h3>Tämän digitaalisen sopimuksentekoprosessin tietoturva toimii seuraavalla tavalla:</h3>
+            <ol>
+                <li>Sopimuksentekoon tarvittavat tiedot kerätään näillä nettisivuilla.
+                <li>Asiakkaan lähettämät tiedot kootaan yhteen ja tiedot käydään läpi Asilon toimesta.</li>
+                <li>Asilo lähettää asiakkaalle Vismasign linkin sopimuksen allekirjoittamista varten.</li>
+            </ol>
+        </div>
+
+    <!-- Confirmation Box -->
+    <div class="confirmation-box">
+        <!-- PDF Links Section -->
+        <div class="pdf-links">
+            <div class="pdf-item">
+                <a href="AsiloPrivatePolicy.pdf" target="_blank">
+                    <img src="pdf.jpeg" alt="Tietosuojaseloste PDF" class="pdf-icon">
+                    <p>Tietosuojaseloste</p>
+                </a>
+            </div>
+        </div>
+         <!-- Checkbox Group -->
+         <div class="checkbox-group">
+            <form id="page0Form">
+                <label>
+                    <input type="checkbox" id="concent" name="concent" required>
+                    Olen lukenut ja hyväksyn Asilon tietoturvakäytänteet.
+                </label>
+                <div class="proceed-button">
+                    <button type="submit" id="proceedButton" disabled>Jatka</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="scripts.js"></script>
+</body>
+</html>
