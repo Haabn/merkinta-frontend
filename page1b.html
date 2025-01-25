@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles1b.css">
+    <title>Asilo Asset Management - Yksityishenkilön Asiakassopimus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/forge/0.10.0/forge.min.js"></script>
+</head>
+<body>
+    <h2>Dokumenttien Vahvistus</h2>
+    <div class="confirmation-box">
+        <!-- PDF Links Section -->
+        <div class="pdf-links">
+            <div class="pdf-item">
+                <a href="Liite1.pdf" target="_blank">
+                    <img src="pdf.jpeg" alt="Liite 1" class="pdf-icon">
+                    <p>Liite 1</p>
+                </a>
+            </div>
+            <div class="pdf-item">
+                <a href="Liite2.pdf" target="_blank">
+                    <img src="pdf.jpeg" alt="Liite 2" class="pdf-icon">
+                    <p>Liite 2</p>
+                </a>
+            </div>
+        </div>
+        <!-- Form section -->
+        <form id="page1bForm">
+            <!-- Checkbox Group -->
+            <div class="checkbox-group">
+                <label>
+                    <input type="checkbox" name="liite1" id="liite1"> Olen lukenut nämä dokumentit
+                </label>
+            </div>
+            <!-- Submit Button -->
+            <div class="proceed-button">
+                <button type="submit" id="proceedButton" disabled>Jatka</button>
+            </div>
+        </form>
+    </div>
+    <!-- Use external scripts.js instead of inline script -->
+    <script src="scripts.js"></script>
+</body>
+</html>
