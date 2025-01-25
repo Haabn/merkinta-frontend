@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asilo Asset Management - Yksityishenkilön Asiakassopimus</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Include Forge library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/forge/0.10.0/forge.min.js"></script>
+</head>
+<body>
+    <!-- Header section -->
+    <div id="header" class="header">
+        <h2>Yksityishenkilön Asiakassopimus</h2>
+        <p>Täytä kaikki kentät huolellisesti.</p>
+    </div>
+
+    <!-- Main form -->
+    <form id="customerForm">
+        <!-- PEP Section -->
+        <h2>Poliittisesti vaikutusvaltainen henkilö ("PEP")</h2>
+            
+        <div class="info-box">
+            <p>Poliittisesti vaikutusvaltaisen henkilön, tämän perheenjäsenen tai yhtiökumppanin määritelmät:</p>
+            <p>Poliittisesti vaikutusvaltaisella henkilöllä tarkoitetaan henkilöä, joka on toiminut viimeisen 12 kuukauden aikana jossain seuraavista merkittävistä julkisista tehtävistä:</p>
+            <ul>
+                <li>parlamentin jäsenenä;</li>
+                <li>valtionpäämiehenä;</li>
+                <li>hallituksen päämiehenä;</li>
+                <li>ministerinä;</li>
+                <li>vara- tai apulaisministerinä;</li>
+                <li>poliittisen puolueen johtoelimen jäsenenä;</li>
+                <li>korkeimman oikeuden, perustuslakituomioistuimen tai muun vastaavan oikeuselimen jäsenenä, jonka päätöksiin ei voida poikkeustapauksia lukuun ottamatta hakea muutosta;</li>
+                <li>tilintarkastustuomioistuimen ja valtiontalouden tarkastusvirastoa vastaavan valtion varainhoitoa tarkastavan ylimmän päättävän elimen jäsenenä;</li>
+                <li>keskuspankin johtokunnan jäsenenä;</li>
+                <li>suurlähettiläänä tai asiainhoitajana;</li>
+                <li>puolustusvoimissa vähintään kenraalikuntaan kuuluvana upseerina;</li>
+                <li>valtion kokonaan omistaman yrityksen hallinto-, johto- ja valvontaelimen jäsenenä;</li>
+                <li>kansainvälisten yhteisöjen johtajana, varajohtajana ja hallituksen jäsenenä</li>
+            </ul>
+            <p>Poliittisesti vaikutusvaltaisen henkilön perheenjäsenellä tarkoitetaan tämän:</p>
+            <ul>
+                <li>aviopuolisoa tai kumppania, joka asianomaisen maan kansallisessa lainsäädännössä rinnastetaan aviopuolisoon;</li>
+                <li>lapsia ja heidän aviopuolisojaan tai edellä tarkoitettua kumppania;</li>
+                <li>vanhempia.</li>
+            </ul>
+        </div>
+        <div class="pepclass">
+            <div class="form-group">
+                <label>Oletko poliittisesti vaikutusvaltainen henkilö ("PEP") tai tällaisen henkilön perheenjäsen tai yhtiökumppani?</label>
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" name="pep" value="pepei" required> Ei
+                    </label>
+                    <label>
+                        <input type="radio" name="pep" value="pepjoo" required> Kyllä
+                    </label>
+                </div>
+                <div id="pepDetailsField" class="conditional-field" style="display: none;">
+                    <label for="pepDetails">Pyydämme teitä antamaan lisätietoja PEP-statuksestanne tai suhteestanne tällaiseen henkilöön:</label>
+                    <textarea id="pepDetails" name="pepDetails"></textarea>
+                </div>
+            </div>
+        </div>
+
+<!-- Tax Residency Section -->
+<div class="form-section tax-compliance">
+    <h4>Verovelvollisuuden ilmoittaminen</h4>
+    
+    <p class="info-text">
+        Sijoittajan itse annettu todistus on tarpeellinen sen määrittämiseksi, voidaanko sijoittajaa tai sijoittajan tosiasiallista edunsaajaa pitää verovelvollisena (asuvas tai rekisteröity) Amerikan Yhdysvalloissa ("USA") tai muussa valtiossa. Pyydämme huomioimaan, että teiltä saatetaan pyytää lisätietoja toimitettuun selvitykseen perustuen.
+    </p>
+
+    <div class="form-group">
+        <label class="checkbox-label" for="joovero">
+            <input type="checkbox" id="joovero" name="joovero"> Olen verovelvollinen seuraavissa maissa:
+        </label>
+    </div>
+
+    <!-- Dynamic Countries and TINs Table -->
+    <div id="veromaaContainer" class="form-group" style="display: none;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Verovelvollisuuden maa</th>
+                    <th>Verotunnus ("TIN")</th>
+                </tr>
+            </thead>
+            <tbody id="veromaaTableBody">
+                <tr>
+                    <td>
+                        <input type="text" name="veromaa1" id="veromaa1" class="veromaa-input" placeholder="Verovelvollisuuden maa">
+                    </td>
+                    <td>
+                        <input type="text" name="tin1" id="tin1" class="tin-input" placeholder="Anna TIN">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="text" name="veromaa2" id="veromaa2" class="veromaa-input" placeholder="Verovelvollisuuden maa">
+                    </td>
+                    <td>
+                        <input type="text" name="tin2" id="tin2" class="tin-input" placeholder="Anna TIN">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="text" name="veromaa3" id="veromaa3" class="veromaa-input" placeholder="Verovelvollisuuden maa">
+                    </td>
+                    <td>
+                        <input type="text" name="tin3" id="tin3" class="tin-input" placeholder="Anna TIN">
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <button type="button" id="addVeromaaBtn" class="add-button">Lisää maa</button>
+    </div>
+
+    <!-- US Tax Liability Section -->
+    <h4>Tuloverovelvollisuus Yhdysvalloissa</h4>
+    <div class="usaform">
+        <div class="radio-group">
+            <label>
+                <input type="radio" name="USA" value="eitulovero" required> 
+                Vahvistan, että en ole tuloverovelvollinen USA:ssa.
+            </label>
+            <label>
+                <input type="radio" name="USA" value="jooUSA" required>
+            </span> 
+                Vahvistan, että minulla on yhteys USA:han, kuten kansalaisuus (mukaan lukien kaksoiskansalaisuus), synnyinpaikka, oleskelulupa (Green Card), osoite tai postiosoite, puhelinnumero, C/O-osoite (in-care-of) tai postilokeropalvelu (hold-mail), määräävä asema USA:han rekisteröidyssä yhtiössä tai muu vastaava yhteys.
+            </span>
+            </label>
+        </div>
+    </div>
+
+       <!-- Add this container for the details field -->
+       <div id="USAdetaljiGroup" style="display: none;">
+        <label for="USAdetalji">Pyydämme teitä antamaan tarkemmat tiedot yhteydestänne USA:han:</label>
+        <textarea id="USAdetalji" name="USAdetalji" rows="3" class="form-control" 
+                  placeholder="Anna tarkemmat tiedot"></textarea>
+    </div>
+</div>
+
+
+        <!-- Approval Section -->
+<div class="form-section">
+    <h2>Hyväksyntä</h2>
+    
+    <!-- Tax Compliance Agreement -->
+    <div class="taxform">
+        <p class="info-text">
+            Hyväksyn sen, että ilmoitan Asilolle kolmenkymmenen (30) päivän kuluessa jokaisesta verovelvollisuuteeni liittyvästä muutoksesta liittyen USA:han tai muuhun valtioon. Kysymyksessä olevassa muutostilanteessa tai tilanteessa, jossa minulla on yhteys USA:han ja en toimita pyynnöstä huolimatta kysymyksessä olevaa tietoa, ja näin toimimalla jätän avustamatta Asiloa täyttämään sen sopimuksellisia, oikeudellisia, ja/tai sääntelyn mukaisia velvoitteitaan USA:n Foreign Account Tax Compliance -lain mukaisesti, sisältäen kaiken vaaditun raportoinnin Yhdysvaltain liittovaltion verohallitukselle (Internal Revenue Service), sitoudun korvaamaan Asilolle virheellisestä tai harhaanjohtavasta tiedosta aiheutuneen vahingon.
+        </p>
+        <label class="checkbox-label" for="jooAsilo">
+            <input type="checkbox" id="jooAsilo" name="jooAsilo" required> Hyväksyn
+        </label>
+    </div>
+</div>
+        <!-- Acting on Behalf of Another and Purpose of Transaction -->
+        <div class="form-section transaction-purpose">
+            <!-- Acting on Behalf of Another -->
+            <div class="acting">
+                <h4>Merkintä muun tahon puolesta</h4>
+                <label>Teetkö merkinnän jonkun muun tahon puolesta?</label>
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" name="muutaho" value="eiminor" required> Ei
+                    </label>
+                    <label>
+                        <input type="radio" name="muutaho" value="joominor" required> Kyllä
+                    </label>
+                </div>
+                <div id="behalfDetailsGroup" class="form-group" style="display: none;">
+                    <label for="Name2">Nimi:</label>
+                    <input type="text" id="Name2" name="Name2" class="text-input" placeholder="Anna nimi">
+                    <label for="ID2">Henkilö- tai Y-tunnus:</label>
+                    <input type="text" id="ID2" name="ID2" class="text-input" placeholder="Anna henkilötunnus tai Y-tunnus">
+                </div>
+            </div>
+
+     <!-- Purpose of Transaction -->
+<div class="purposeform">
+    <h4>Liiketoimen tai sijoituspalvelun käytön tarkoitus</h4>
+    <label>Valitse tarkoitus:</label>
+    <div class="checkbox-group">
+        <div class="checkbox-item">
+            <input type="checkbox" id="yleinensij" name="yleinensij" value="true">
+            <label for="yleinensij">Yleinen sijoitustoiminta (voiton tavoittelu)</label>
+        </div>
+        <div class="checkbox-item">
+            <input type="checkbox" id="saastaminen" name="saastaminen" value="true">
+            <label for="saastaminen">Säästäminen</label>
+        </div>
+        <div class="checkbox-item">
+            <input type="checkbox" id="muuliike" name="muuliike" value="true">
+            <label for="muuliike">Muu</label>
+        </div>
+    </div>
+    <div class="form-group" id="muuliikeTextContainer" style="display: none;">
+        <input type="text" id="muuliiketext" name="muuliiketext" class="text-input" placeholder="Anna lisätiedot">
+    </div>
+</div>
+
+
+        <!-- Investment Experience and Investor Background Section -->
+        <div class="form-section investment-background">
+            <h4>Sijoituskokemus ja sijoittajan tausta</h4>
+
+<!-- Investment Experience Section -->
+<div class="experienceform">
+    <p class="subtitle">Sijoittajan entuudestaan tuntemat palvelut (sijoittaja voi tuntea palvelun, vaikka siitä ei olisi kokemusta - tällöin kokemukseksi ilmoitetaan 0 vuotta)</p>
+    
+   <!-- Full Power of Attorney -->
+<div class="service-item">
+    <label>Täyden valtakirjan varainhoito:</label>
+    <div class="tvkform">
+        <label>
+            <input type="radio" name="TVK" value="TVKjoo" required> Kyllä
+        </label>
+        <label>
+            <input type="radio" name="TVK" value="TVKei" required> Ei
+        </label>
+    </div>
+    <div id="TVKvuosiGroup" class="form-group" style="display: none;">
+        <label for="TVKvuosi">Kuinka monta vuotta?</label>
+        <input type="text" id="TVKvuosi" name="TVKvuosi" class="text-input" placeholder="Anna vuosien määrä">
+    </div>
+</div>
+
+<!-- Consultative Asset Management -->
+<div class="service-item">
+    <label>Konsultatiivinen varainhoito:</label>
+    <div class="radio-group">
+        <label>
+            <input type="radio" name="kons" value="konsjoo" required> Kyllä
+        </label>
+        <label>
+            <input type="radio" name="kons" value="konsei" required> Ei
+        </label>
+    </div>
+    <div id="konsvuosiGroup" class="form-group" style="display: none;">
+        <label for="konsvuosi">Kuinka monta vuotta?</label>
+        <input type="text" id="konsvuosi" name="konsvuosi" class="text-input" placeholder="Anna vuosien määrä">
+    </div>
+</div>
+
+<!-- Independent Investment -->
+<div class="service-item">
+    <label>Itsenäinen sijoitustoiminta:</label>
+    <div class="radio-group">
+        <label>
+            <input type="radio" name="itse" value="itsejoo" required> Kyllä
+        </label>
+        <label>
+            <input type="radio" name="itse" value="itsei" required> Ei
+        </label>
+    </div>
+    <div id="itsevuosiGroup" class="itseform" style="display: none;">
+        <label for="itsevuosi">Kuinka monta vuotta?</label>
+        <input type="text" id="itsevuosi" name="itsevuosi" class="text-input" placeholder="Anna vuosien määrä">
+    </div>
+</div>
+            <!-- Education Level -->
+            <div class="educationform">
+                <label>Sijoittajan koulutustaso:</label>
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" name="educationLevel" value="perus" required> Yleissivistävä perusopetus
+                    </label>
+                    <label>
+                        <input type="radio" name="educationLevel" value="toinenaste" required> Toisen asteen koulutus
+                    </label>
+                    <label>
+                        <input type="radio" name="educationLevel" value="korkea" required> Korkea-asteen koulutus
+                    </label>
+                </div>
+            </div>
+
+            <!-- Degree and Field -->
+            <div class="form-group">
+                <label for="tutkinto">Tutkinto ja/tai koulutuksen ala:</label>
+                <input type="text" id="tutkinto" name="tutkinto" class="text-input" placeholder="Anna tutkinnon nimi tai koulutusalan">
+            </div>
+
+            <!-- Other Education Information -->
+            <div class="form-group">
+                <label for="muukoulutus">Muut koulutukseen liittyvät tiedot, joilla voi olla merkitystä arvioitaessa asiakkaan sijoitusosaamista:</label>
+                <textarea id="muukoulutus" name="muukoulutus" rows="3" placeholder="Anna lisätietoja"></textarea>
+            </div>
+
+            <!-- Profession -->
+            <div class="form-group">
+                <label for="ammatti">Sijoittajan ammatti tai aikaisempi ammatti:</label>
+                <input type="text" id="ammatti" name="ammatti" class="text-input" placeholder="Anna ammatti tai aikaisempi ammatti">
+            </div>
+        </div>
+
+        <!-- Customer Classification Section -->
+        <div class="form-section customer-classification">
+            <h4>Asiakasluokittelu</h4>
+            <div class="form-group">
+                <label>Asilo on Asiakkaan antamien tietojen perusteella luokitellut Asiakkaan sijoittajana:</label>
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" name="luokittelu" value="ei_ammattimainen" required> Ei-ammattimaiseksi asiakkaaksi
+                    </label>
+                    <label>
+                        <input type="radio" name="luokittelu" value="ammattimainen" required> Ammattimaiseksi asiakkaaksi
+                    </label>
+                    <label>
+                        <input type="radio" name="luokittelu" value="hyva" required> Hyväksyttäväksi vastapuoleksi
+                    </label>
+                </div>
+                <p class="info-text">
+                    Ei-ammattimainen asiakas on laajimman sijoittajansuojan piirissä ja hänen kohdallaan tiedonanto- ja selonottovelvollisuus sekä sijoituspalvelun tarjoamista koskevat menettelytapasäännökset ovat laajimmat.
+                    Vain ei-ammattimaiset asiakkaat kuuluvat sijoittajien korvausrahaston suojan piiriin. Palveluntarjoajan menettelytapavelvoitteet eivät lähtökohtaisesti sovellu hyväksyttäviin vastapuoleihin.
+                    Ei-ammattimaisella asiakkaalla on oikeus pyytää kirjallisesti asiakasluokittelunsa muuttamista, mikäli se katsoo, että ammattimaisen asiakkaan edellytykset täyttyvät.
+                    Ammattimaisella asiakkaalla on oikeus pyytää kirjallisesti asiakasluokittelun muuttamista ei-ammattimaiseksi asiakkaaksi tai hyväksyttäväksi vastapuoleksi.
+                    Asilolla ei ole velvollisuutta suostua Asiakkaan pyyntöön, jos se katsoo, ettei asiakasluokittelun muutokselle ole edellytyksiä tai perusteita.
+                </p>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit">Lähetä tiedot</button>
+    </form>        
+
+    <!-- JavaScript to Handle Dynamic Form Elements -->
+   
+
+
+    
+    <script src="scripts.js"></script>
+</body>
+</html>
