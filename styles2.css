@@ -1,0 +1,366 @@
+/* Import Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap');
+
+/* Basic page layout */
+body {
+    font-family: 'Raleway', sans-serif;
+    color: #333;
+    background-color: #f0ece3;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Form section container */
+.form-section {
+    width: 100%;
+    max-width: 1400px;
+    margin: 20px auto;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+/* Header styling */
+h4 {
+    color: #333;
+    font-size: 24px;
+    margin: 0 0 20px 0;
+    padding: 0;
+    font-weight: 700;
+}
+
+/* Experience form container */
+.experienceform {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+/* Subtitle styling */
+.subtitle {
+    color: #555;
+    font-size: 14px; /* Slightly smaller text for desktop */
+    margin: 0 0 20px 0;
+    line-height: 1.5;
+}
+
+/* Table container */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+/* Table styling */
+table {
+    width: 100%;
+    min-width: 800px;
+    border-collapse: collapse;
+    margin: 0;
+    background: white;
+    font-size: 13px; /* Smaller font size for desktop table content */
+    line-height: 1.3;
+}
+
+/* Table header and cell styling */
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+    vertical-align: middle;
+    background: white;
+}
+
+th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #333;
+    white-space: nowrap;
+}
+
+/* Sticky first column */
+th:first-child,
+td:first-child {
+    background: white;
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    border-right: 2px solid #ddd;
+}
+
+th:first-child {
+    background: #f8f9fa;
+    z-index: 2;
+}
+
+/* Radio group styling */
+.radio-group {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    width: 100%;
+}
+
+/* Larger touch target for radio labels and remove tap highlight */
+.radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+    padding: 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+    font-size: 13px; /* Slightly smaller desktop font */
+    line-height: 1.3;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.radio-group label:hover {
+    background-color: #e6f0ff;
+}
+
+/* Radio input styling - Desktop */
+.radio-group input[type="radio"] {
+    margin: 0;
+    width: 13px; /* 13px on desktop as requested */
+    height: 13px;
+    position: relative;
+    cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border: 2px solid #666;
+    border-radius: 50%;
+    outline: none;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    background: #fff;
+}
+
+/* Custom radio button styling */
+.radio-group input[type="radio"]::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: #00509e;
+    opacity: 0;
+    transition: all 0.2s ease;
+}
+
+/* Checked state */
+.radio-group input[type="radio"]:checked {
+    border-color: #00509e;
+}
+
+.radio-group input[type="radio"]:checked::before {
+    opacity: 1;
+}
+
+/* Remove focus outline on radio inputs */
+.radio-group input[type="radio"]:focus {
+    outline: none;
+}
+
+/* Text input styling */
+.text-input {
+    width: 100%;
+    padding: 6px 10px; /* Slightly smaller for desktop */
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 13px; /* Smaller font size for desktop text input */
+    height: 36px;
+    box-sizing: border-box;
+}
+
+.text-input:focus {
+    outline: none;
+    border-color: #4285f4;
+    box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+}
+
+/* Submit button styling */
+.submit-button {
+    margin-top: 30px;
+    text-align: center;
+    padding: 0 20px;
+}
+
+.submit-button button {
+    background-color: #00509e;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 30px;
+    font-size: 14px;
+    cursor: pointer;
+    width: 100%;
+    max-width: 400px;
+    transition: background-color 0.3s ease;
+}
+
+.submit-button button:hover {
+    background-color: #003f87;
+}
+
+.submit-button button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* Error states */
+.text-input.error {
+    border-color: #dc3545;
+    background-color: #fff8f8;
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+    body {
+        padding: 0;
+    }
+
+    .form-section {
+        margin: 0;
+        padding: 10px;
+    }
+
+    h4 {
+        font-size: 20px;
+        padding: 0 10px;
+        margin-bottom: 15px;
+    }
+
+    .experienceform {
+        border-radius: 0;
+        padding: 10px 0;
+        margin: 0;
+        box-shadow: none;
+    }
+
+    .subtitle {
+        padding: 0 15px;
+        font-size: 14px;
+        margin-bottom: 15px;
+    }
+
+    .table-container {
+        margin: 0;
+        border-left: none;
+        border-right: none;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+        font-size: 14px; /* Slightly larger for mobile legibility */
+    }
+
+    th, td {
+        padding: 6px;
+        font-size: 14px;
+        line-height: 1.2;
+    }
+
+    th:first-child,
+    td:first-child {
+        box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+    }
+
+    .radio-group {
+        gap: 20px;
+        justify-content: center;
+    }
+
+    .radio-group label {
+        flex: 1;
+        justify-content: center;
+        padding: 10px;
+        margin: 0;
+        font-size: 16px;
+        touch-action: manipulation;
+    }
+
+    .radio-group input[type="radio"] {
+        width: 28px; /* Larger on mobile */
+        height: 28px;
+    }
+
+    .radio-group input[type="radio"]::before {
+        width: 16px;
+        height: 16px;
+    }
+
+    .text-input {
+        font-size: 16px;
+        padding: 8px;
+        height: 44px;
+    }
+
+    .submit-button {
+        padding: 15px;
+        margin-top: 20px;
+    }
+
+    .submit-button button {
+        width: 100%;
+        max-width: none;
+        min-height: 44px;
+    }
+}
+
+/* iOS specific fixes */
+@supports (-webkit-touch-callout: none) {
+    .table-container {
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .radio-group label {
+        -webkit-tap-highlight-color: transparent;
+    }
+}
+
+/* Firefox specific fixes */
+@-moz-document url-prefix() {
+    .table-container {
+        scrollbar-width: thin;
+        scrollbar-color: #888 #f1f1f1;
+    }
+}
+
+/* Loading and output sections */
+#loading-section, #output-section {
+    display: none;
+}
+
+#loading-section.visible,
+#output-section.visible {
+    display: block;
+}
+
+/* Fix for sticky header in some mobile browsers */
+@media (max-width: 768px) {
+    th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: #f8f9fa;
+    }
+}
