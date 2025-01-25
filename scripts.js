@@ -567,8 +567,6 @@ function createFormDataObject(formData) {
     else if (currentPage.includes('page2a.html')) {
         // Page 2a - Personal Information only
         formDataObj = {
-            Name1: formData.get('Name1'),
-            ID: formData.get('ID'),
             Adress: formData.get('Adress'),
             postinumero: formData.get('postinumero'),
             postitoimipaikka: formData.get('postitoimipaikka'),
