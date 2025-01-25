@@ -28,11 +28,17 @@ document.addEventListener('DOMContentLoaded', function() {
 function getAuthToken() {
     const urlParams = new URLSearchParams(window.location.search);
     const authData = urlParams.get('auth_data');
-    if (authData) {
+    if (!authData) {
+        window.location.href = 'index.html';
+        return null;
+    }
+    try {
         const decodedData = JSON.parse(atob(authData));
         return decodedData.sessionToken;
+    } catch (error) {
+        window.location.href = 'index.html';
+        return null;
     }
-    return null;
 }
 
 // DOM Elements - Common across all pages
@@ -43,6 +49,7 @@ const customerForm = document.getElementById('customerForm');
 const currentPage = window.location.pathname;
 const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
 const maxFileSize = 5 * 1024 * 1024; // 5MB
+const tempStorage = new Map();
 
 const sopimusElements = {
     consentCheckbox: document.getElementById('concent'),
@@ -782,6 +789,7 @@ function createFormDataObject(formData) {
                 encryptedKeyRSA: encryptedAESKeyRSA,
                 iv: aesIVHex,
                 step: step,
+                sessionId: authToken 
             };
     
             console.log("Sending payload to backend:", payload);
@@ -808,15 +816,14 @@ function createFormDataObject(formData) {
             handleSessionResponse(responseData, step);
             updateUIState();
     
-        } catch (error) {
-            console.error("An error occurred during the encryption process:", error);
-            if (error.message.includes('Session expired') || error.message.includes('Session ID is missing')) {
-                window.location.href = 'sopimus.html';
-            }
-            handleUIError(error);
+         } catch (error) {
+        if (error.message.includes('Authentication required')) {
+            window.location.href = 'index.html';
         }
+        handleUIError(error);
     }
-            
+}
+           
 
 // Event Listeners (all listeners together)
 if (window.location.pathname.includes('page2c.html')) {
