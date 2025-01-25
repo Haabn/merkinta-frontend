@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asilo Asset Management - Asiakassopimus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles2.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/forge/0.10.0/forge.min.js"></script>
+</head>
+<body>
+    <div id="outputDiv"></div>
+    <div id="output-section"></div>
+    <div id="loading-section"></div>
+
+    <div class="form-section">
+        <h4>Sijoituskokemus ja sijoittajan tausta</h4>
+        <div class="experienceform">
+            <p class="subtitle">Sijoittajan entuudestaan tuntemat rahoitusvälineet ja muut sijoituskohteet. Ainakin yhteen on vastattava kyllä.</p>
+            <form id="customerForm">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Sijoituskohteet</th>
+                                <th>Tunnen seuraavat sijoituskohteet</th>
+                                <th>Kauppoja vuosina</th>
+                                <th>Kauppojen määrä</th>
+                                <th>Viimeisin kauppa</th>
+                                <th>Kaupat yhteensä euroa</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Sijoitusrahastot -->
+                            <tr>
+                                <td>Sijoitusrahastot</td>
+                                <td>
+                                    <div class="radio-group">
+                                        <label>
+                                            <input type="radio" name="sijoitusrahastot_knowledge" value="Kyllä" required>
+                                            <span>Kyllä</span>
+                                        </label>
+                                        <label>
+                                            <input type="radio" name="sijoitusrahastot_knowledge" value="Ei">
+                                            <span>Ei</span>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td><input type="text" name="sijoitusrahastot_years" class="text-input" inputmode="numeric"></td>
+                                <td><input type="text" name="sijoitusrahastot_count" class="text-input" inputmode="numeric"></td>
+                                <td><input type="text" name="sijoitusrahastot_last" class="text-input" inputmode="numeric"></td>
+                                <td><input type="text" name="sijoitusrahastot_total" class="text-input" inputmode="numeric"></td>
+                            </tr>
+
+                            <!-- Vaihtoehtorahastot -->
+                            <tr>
+                                <td>Vaihtoehtorahastot</td>
+                                <td>
+                                    <div class="radio-group">
+                                        <label>
+                                            <input type="radio" name="vaihtoehtorahastot_knowledge" value="Kyllä" required>
+                                            <span>Kyllä</span>
+                                        </label>
+                                        <label>
+                                            <input type="radio" name="vaihtoehtorahastot_knowledge" value="Ei">
+                                            <span>Ei</span>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td><input type="text" name="vaihtoehtorahastot_years" class="text-input" inputmode="numeric"></td>
+                                <td><input type="text" name="vaihtoehtorahastot_count" class="text-input" inputmode="numeric"></td>
+                                <td><input type="text" name="vaihtoehtorahastot_last" class="text-input" inputmode="numeric"></td>
+                                <td><input type="text" name="vaihtoehtorahastot_total" class="text-input" inputmode="numeric"></td>
+                            </tr>
+
+                            <!-- Osakkeet -->
+                            <tr>
+                                <td>Osakkeet</td>
+                                <td>
+                                    <div class="radio-group">
+                                        <label>
+                                            <input type="radio" name="osakkeet_knowledge" value="Kyllä" required>
+                                            <span>Kyllä</span>
+                                        </label>
+                                        <label>
+                                            <input type="radio" name="osakkeet_knowledge" value="Ei">
+                                            <span>Ei</span>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td><input type="text" name="osakkeet_years" class="text-input" inputmode="numeric"></td>
+                                <td><input type="text" name="osakkeet_count" class="text-input" inputmode="numeric"></td>
+                                <td><input type="text" name="osakkeet_last" class="text-input" inputmode="numeric"></td>
+                                <td><input type="text" name="osakkeet_total" class="text-input" inputmode="numeric"></td>
+                            </tr>
+
+                            <!-- Joukkovelkakirjalainat -->
+                            <tr>
+                                <td>Joukkovelkakirjalainat</td>
+                                <td>
+                                    <div class="radio-group">
+                                        <label>
+                                            <input type="radio" name="joukkovelkakirjalainat_knowledge" value="Kyllä" required>
+                                            <span>Kyllä</span>
+                                        </label>
+                                        <label>
+                                            <input type="radio" name="joukkovelkakirjalainat_knowledge" value="Ei">
+                                            <span>Ei</span>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td><input type="text" name="joukkovelkakirjalainat_years" class="text-input" inputmode="numeric"></td>
+                                <td><input type="text" name="joukkovelkakirjalainat_count" class="text-input" inputmode="numeric"></td>
+                                <td><input type="text" name="joukkovelkakirjalainat_last" class="text-input" inputmode="numeric"></td>
+                                <td><input type="text" name="joukkovelkakirjalainat_total" class="text-input" inputmode="numeric"></td>
+                            </tr>
+
+                            <!-- Johdannaiset -->
+                            <tr>
+                                <td>Johdannaiset ja warrantit</td>
+                                <td>
+                                    <div class="radio-group">
+                                        <label>
+                                            <input type="radio" name="johdannaiset_knowledge" value="Kyllä" required>
+                                            <span>Kyllä</span>
+                                        </label>
+                                        <label>
+                                            <input type="radio" name="johdannaiset_knowledge" value="Ei">
+                                            <span>Ei</span>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td><input type="text" name="johdannaiset_years" class="text-input" inputmode="numeric"></td>
+                                <td><input type="text" name="johdannaiset_count" class="text-input" inputmode="numeric"></td>
+                                <td><input type="text" name="johdannaiset_last" class="text-input" inputmode="numeric"></td>
+                                <td><input type="text" name="johdannaiset_total" class="text-input" inputmode="numeric"></td>
+                            </tr>
+
+                            <!-- Pääomaturvatut -->
+                            <tr>
+                                <td>Pääomaturvatut sijoituslainat</td>
+                                <td>
+                                    <div class="radio-group">
+                                        <label>
+                                            <input type="radio" name="paaomaturvatut_knowledge" value="Kyllä" required>
+                                            <span>Kyllä</span>
+                                        </label>
+                                        <label>
+                                            <input type="radio" name="paaomaturvatut_knowledge" value="Ei">
+                                            <span>Ei</span>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td><input type="text" name="paaomaturvatut_years" class="text-input" inputmode="numeric"></td>
+                                <td><input type="text" name="paaomaturvatut_count" class="text-input" inputmode="numeric"></td>
+                                <td><input type="text" name="paaomaturvatut_last" class="text-input" inputmode="numeric"></td>
+                                <td><input type="text" name="paaomaturvatut_total" class="text-input" inputmode="numeric"></td>
+                            </tr>
+
+                            <!-- Kiinteistöt -->
+                            <tr>
+                                <td>Kiinteistöt ja asunto-osakkeet</td>
+                                <td>
+                                    <div class="radio-group">
+                                        <label>
+                                            <input type="radio" name="kiinteistot_knowledge" value="Kyllä" required>
+                                            <span>Kyllä</span>
+                                        </label>
+                                        <label>
+                                            <input type="radio" name="kiinteistot_knowledge" value="Ei">
+                                            <span>Ei</span>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td><input type="text" name="kiinteistot_years" class="text-input" inputmode="numeric"></td>
+                                <td><input type="text" name="kiinteistot_count" class="text-input" inputmode="numeric"></td>
+                                <td><input type="text" name="kiinteistot_last" class="text-input" inputmode="numeric"></td>
+                                <td><input type="text" name="kiinteistot_total" class="text-input" inputmode="numeric"></td>
+                            </tr>
+
+                            <!-- Talletukset -->
+                            <tr>
+                                <td>Talletukset ja rahamarkkinavälineet</td>
+                                <td>
+                                    <div class="radio-group">
+                                        <label>
+                                            <input type="radio" name="talletukset_knowledge" value="Kyllä" required>
+                                            <span>Kyllä</span>
+                                        </label>
+                                        <label>
+                                            <input type="radio" name="talletukset_knowledge" value="Ei">
+                                            <span>Ei</span>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td><input type="text" name="talletukset_years" class="text-input" inputmode="numeric"></td>
+                                <td><input type="text" name="talletukset_count" class="text-input" inputmode="numeric"></td>
+                                <td><input type="text" name="talletukset_last" class="text-input" inputmode="numeric"></td>
+                                <td><input type="text" name="talletukset_total" class="text-input" inputmode="numeric"></td>
+                            </tr>
+
+                            <!-- Muu sijoituskokemus -->
+                            <tr>
+                                <td>Muu sijoituskokemus</td>
+                                <td colspan="5">
+                                    <input type="text" name="kokemusmuudetalji" class="text-input" placeholder="Anna lisätiedot">
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="submit-button">
+                    <button type="submit">Lähetä tiedot</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="scripts.js"></script>
+</body>
+</html>
