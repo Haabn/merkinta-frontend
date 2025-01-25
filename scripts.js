@@ -545,7 +545,7 @@ function createFormDataObject(formData) {
     formDataObj = {
         concent: formData.has('concent'),
     };
-}
+
 
     }
     else if (currentPage.includes('page1a.html')) {
@@ -742,11 +742,6 @@ function createFormDataObject(formData) {
                 currentPage.includes('page3.html') ? 'page3' :
                 'unknown';
     
-            // Retrieve sessionId from sessionStorage
-            let sessionId = sessionStorage.getItem('formSessionId');
-            if (!sessionId) {
-                throw new Error('Session ID is missing. Please start from the beginning.');
-            }
     
             let jsonString;
             if (type === 'passport') {
@@ -795,9 +790,9 @@ function createFormDataObject(formData) {
             console.log("Sending payload to backend:", payload);
 
             const headers = {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${sessionId}`  // Use Signicat session token
-};
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+        };
             
             // Send to backend
             const API_URL = 'https://api.chatasilo.com/sopimus-api/consent';
