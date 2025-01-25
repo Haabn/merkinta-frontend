@@ -40,6 +40,17 @@ function getAuthToken() {
         return null;
     }
 }
+function checkSession() {
+    const token = getAuthToken();
+    if (!token) {
+        window.location.href = 'index.html';
+    }
+}
+    function handleSessionResponse(responseData, step) {
+    if (responseData.nextPage) {
+        window.location.href = responseData.nextPage;
+    }
+}
 
 // DOM Elements - Common across all pages
 const outputDiv = document.getElementById('outputDiv');
@@ -793,7 +804,6 @@ function createFormDataObject(formData) {
         };
             
             // Send to backend
-            const API_URL = 'https://api.chatasilo.com/sopimus-api/consent';
             const response = await fetch(`${API_URL}/decrypt`, {
             method: 'POST',
             headers,
