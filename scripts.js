@@ -44,8 +44,8 @@ const currentPage = window.location.pathname;
 const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
 const maxFileSize = 5 * 1024 * 1024; // 5MB
 
-const page0Elements = {
-    consentCheckbox: document.getElementById('concent'),  // Match HTML ID
+const sopimusElements = {
+    consentCheckbox: document.getElementById('concent'),
     proceedButton: document.getElementById('proceedButton')
 };
 
@@ -534,10 +534,11 @@ function createFormDataObject(formData) {
     // Base object with common fields
     let formDataObj = {};
 
-    if (currentPage.includes('page0.html')) {
-        formDataObj = {
-            concent: formData.has('concent'),
-        };
+   if (currentPage.includes('sopimus.html')) {
+    formDataObj = {
+        concent: formData.has('concent'),
+    };
+}
 
     }
     else if (currentPage.includes('page1a.html')) {
@@ -723,7 +724,7 @@ function createFormDataObject(formData) {
             // Determine current step based on page
             const currentPage = window.location.pathname;
             const step = type === 'passport' ? 'passport' :
-                currentPage.includes('page0.html') ? 'page0' :
+                currentPage.includes('sopimus.html') ? 'sopimus' :
                 currentPage.includes('page1a.html') ? 'page1a' :
                 currentPage.includes('page1b.html') ? 'page1b' :
                 currentPage.includes('page1c.html') ? 'page1c' :
@@ -810,7 +811,7 @@ function createFormDataObject(formData) {
         } catch (error) {
             console.error("An error occurred during the encryption process:", error);
             if (error.message.includes('Session expired') || error.message.includes('Session ID is missing')) {
-                window.location.href = 'page0.html';
+                window.location.href = 'sopimus.html';
             }
             handleUIError(error);
         }
