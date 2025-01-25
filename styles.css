@@ -1,0 +1,413 @@
+/* General Styling */
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap');
+
+body {
+    font-family: 'Raleway', sans-serif;
+    color: #333;
+    background-color: #f0ece3;
+    margin: 0;
+    padding-top: 10vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
+}
+
+form {
+    max-width: 700px;
+    width: 100%;
+    background-color: #ffffff;
+    padding: 30px;
+    margin-top: 15px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+h4 {
+    font-size: 1.2em;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.form-section {
+    margin-bottom: 30px;
+}
+
+/* Form Columns Styling */
+.form-columns {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.form-columns .form-group {
+    flex: 0 0 48%;
+    box-sizing: border-box;
+    margin-bottom: 15px;
+}
+
+.form-columns .form-group.full-width {
+    flex: 0 0 100%;
+}
+
+@media (max-width: 600px) {
+    .form-columns .form-group {
+        flex: 0 0 100%;
+    }
+}
+
+/* Form Elements */
+label {
+    /* Removed bold formatting */
+    font-weight: normal;
+    display: block;
+    margin-bottom: 5px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="date"],
+select,
+textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+    margin-right: 10px;
+}
+
+.checkbox-group,
+.radio-group {
+    margin-top: 10px;
+}
+
+.checkbox-group label,
+.radio-group label {
+    /* Removed bold formatting */
+    display: block;
+    margin-bottom: 5px;
+    font-weight: normal;
+}
+
+/* Tax Compliance Section */
+.tax-compliance {
+    margin-bottom: 30px;
+}
+
+.tax-compliance table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 10px;
+}
+
+.tax-compliance th,
+.tax-compliance td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+}
+
+.tax-compliance th {
+    background-color: #f9f9f9;
+}
+
+.tax-compliance .add-button {
+    padding: 8px 12px;
+    background-color: #00509e;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-family: 'Raleway', sans-serif;
+    font-size: 14px;
+}
+
+.tax-compliance .add-button:hover {
+    background-color: #003f87;
+}
+
+/* Transaction Purpose Section */
+.transaction-purpose {
+    margin-top: 40px;
+    margin-bottom: 30px;
+}
+
+.transaction-purpose .radio-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.transaction-purpose .radio-group label {
+    margin-bottom: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+/* Investment Background Section */
+.investment-background {
+    margin-top: 40px;
+    margin-bottom: 30px;
+}
+
+.investment-background .form-group {
+    margin-bottom: 25px;
+}
+
+.investment-background textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    resize: vertical;
+    margin-top: 5px;
+}
+
+/* Customer Classification Section */
+.customer-classification {
+    margin-top: 40px;
+    margin-bottom: 30px;
+}
+
+.customer-classification .info-text {
+    /* Adjusted spacing */
+    margin-top: 15px;
+    line-height: 1.5;
+    font-size: 13px;
+    /* Ensured normal font weight */
+    font-weight: normal;
+}
+
+/* Utility Classes */
+.other-text {
+    display: none;
+    margin-top: 10px;
+}
+
+.info-text {
+    font-size: 0.9em;
+    color: #555;
+    margin-bottom: 10px;
+    /* Ensured normal font weight */
+    font-weight: normal;
+}
+
+.years-input {
+    display: none;
+    margin-top: 10px;
+}
+
+/* Submit Button */
+button[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    background-color: #00509e;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 1em;
+    cursor: pointer;
+    margin-top: 15px;
+}
+
+button[type="submit"]:hover {
+    background-color: #003f87;
+}
+
+/* Additional Styling for Non-Bold Texts */
+/* Remove bold from specific paragraphs if necessary */
+.info-text, .checkbox-label, label {
+    font-weight: normal;
+}
+
+/* Adjust spacing after specific paragraphs */
+/* Adding more margin-bottom to specific paragraphs */
+.tax-compliance .info-text,
+.transaction-purpose .info-text,
+.investment-background .info-text {
+    margin-bottom: 15px; /* Increased from 10px */
+}
+
+/* Adjust spacing before specific paragraphs */
+/* Adding more margin-top to specific paragraphs */
+.tax-compliance .info-text:first-of-type,
+.customer-classification .info-text {
+    margin-top: 20px; /* Increased from default */
+}
+
+/* Ensure that specific text blocks are not bold */
+.form-group p.info-text {
+    font-weight: normal;
+}
+
+/* Set the font size for the US Tax Liability section */
+.usaform {
+    font-size: 0.93em;
+    margin-bottom: 20px; /* Optional: Adds space below the section */
+    margin-top: 17px;
+}
+
+/* Style the radio group labels */
+.usaform .radio-group label {
+    display: flex; /* Use flexbox for alignment */
+    align-items: flex-start; /* Align items at the top */
+    position: relative; /* For positioning the radio button */
+    padding-left: 30px; /* Space for the radio button */
+    margin-bottom: 10px; /* Space between radio options */
+    cursor: pointer; /* Change cursor on hover */
+    line-height: 1.2; /* Improves readability */
+}
+
+/* Style the radio buttons */
+.usaform .radio-group label input[type="radio"] {
+    position: absolute;
+    left: 0;
+    top: 5;
+    margin: 0;
+    /* Optional: Increase clickable area */
+    width: 15px;
+    height: 15px;
+}
+
+/* Style the span inside labels for text */
+.usaform .radio-group label span {
+    display: inline-block;
+    text-align: left;
+}
+#USAdetaljiGroup label {
+    display: block;
+    margin-top: 15px;
+    font-size: 0.93em;
+}
+
+
+
+/* Space after "Valitse tarkoitus:" */
+.checkbox-group {
+    margin-top: 15px;
+}
+
+/* Checkbox items alignment and reduced spacing */
+.checkbox-item {
+    display: flex;
+    margin-bottom: 6px;  /* Reduced from 15px for closer checkboxes */
+    align-items: center;
+}
+
+.checkbox-item input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+/* Text input alignment */
+#muuliikeTextContainer {
+    margin-left: 24px;
+}
+
+/* Space before next section */
+.form-section.investment-background {
+    margin-top: 20px;  /* Controls space before next section */
+}
+
+/* PEP Question specific styling */
+.pepclass .radio-group {
+    margin-top: 16px;
+}
+
+.pepclass .radio-group label {
+    margin-bottom: 6px;
+    padding-top: 1px;
+}
+
+.pepclass input[type="radio"] {
+    margin-right: 10px;
+    vertical-align: middle;
+}
+/* Add spacing above the details field when it appears */
+#pepDetailsField {
+    margin-top: 15px;    /* Adds space above the details box */
+}
+/* Space above checkbox in approval section */
+.taxform .checkbox-label {
+    margin-top: 20px;
+    display: block;
+}
+
+/* Reduce space between approval and next section */
+.taxform {
+    margin-bottom: 0px;  /* Reduced space after the approval section */
+    margin-top: 20px;
+}
+
+/* Reduce space between approval and next section */
+.form-section.transaction-purpose {
+    margin-top: 0px;  /* Reduces space after the approval section */
+}
+/* Add space before education level section */
+.educationform {
+    margin-top: 20px;  /* Adds about one row of space */
+    margin-bottom: 20px;
+}
+/* Existing styles remain the same */
+
+/* Error States */
+input.error,
+textarea.error {
+    border-color: #dc3545;
+    background-color: #fff8f8;
+}
+
+input.error:focus,
+textarea.error:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    outline: none;
+}
+
+.radio-group.error {
+    padding: 10px;
+    border: 1px solid #dc3545;
+    border-radius: 4px;
+    background-color: #fff8f8;
+}
+
+/* Error Message Styling */
+.error-message {
+    color: #dc3545;
+    font-size: 0.875em;
+    margin-top: 5px;
+    display: block;
+}
+
+/* Required Field Indicator */
+label.required::after {
+    content: " *";
+    color: #dc3545;
+}
+
+/* Visual feedback for invalid fields */
+input:invalid,
+textarea:invalid {
+    border-color: #dc3545;
+}
+
+/* Animation for error state */
+@keyframes errorShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.error {
+    animation: errorShake 0.4s ease-in-out;
+}
