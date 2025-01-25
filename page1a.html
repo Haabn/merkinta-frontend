@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asilo Asset Management - Asiakassopimus</title>
+    <!-- Link to Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Link to External CSS File -->
+    <link rel="stylesheet" href="styles1.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/forge/0.10.0/forge.min.js"></script>
+   
+    
+</head>
+<body>
+     <!-- Welcome Message at the Top -->
+     <div id="welcomeMessage">
+        <h2>Asilo Asset Management - Asiakassopimus</h2>
+        <p>On ilo saada sinut asiakkaaksi. Täytäthän kentät huolellisesti</p>
+    </div>
+
+    <!-- Centered Selection Step within a Form -->
+    <div id="onboardingSelection">
+        <p>Valitse asiakastyyppi:</p>
+        <form id="page1aForm">
+            <div class="checkbox-group">
+                <div class="checkbox-item">
+                    <input type="checkbox" name="liite3" id="liite3">
+                    <label for="liite3">Yksityisasiakas</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" name="liite4" id="liite4">
+                    <label for="liite4">Yritysasiakas</label>
+                </div>
+            </div>
+            <!-- Error Message Placeholder -->
+            <div id="errorMessage" class="error-message" aria-live="assertive"></div>
+
+            <!-- Submit Button -->
+            <button type="submit" id="submitButton">Jatka</button>
+        </form>
+    </div>
+
+<!-- Link to External JavaScript File -->
+<script src="scripts.js"></script>
+
+</body>
+</html>
