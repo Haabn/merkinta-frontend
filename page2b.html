@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asilo Asset Management - Yksityishenkilön Asiakassopimus</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Add Forge library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/forge/0.10.0/forge.min.js"></script>
+</head>
+<body>
+    <!-- Header section -->
+    <div id="header" style="text-align:center; margin-bottom:20px;">
+        <h2>Yksityishenkilön Asiakassopimus</h2>
+        <p>Täytä kaikki kentät huolellisesti.</p>
+    </div>
+
+        <!-- Main form -->
+        <form id="customerForm" action="Page2c.html" method="get">
+       
+            <!-- Financial Situation Section -->
+            <div class="form-section">
+             <h4>Taloudellinen tilanne ja sijoitustiedot</h4>
+             <div class="form-columns">
+                 <!-- Nettovarallisuus (varat - velat) euroissa -->
+                 <div class="form-group full-width">
+                     <label for="varat">Nettovarallisuus (varat - velat) euroissa:</label>
+                     <input type="text" id="varat" name="varat" required>
+                 </div>
+             </div>
+         
+             <!-- Varojen alkuperä on new row -->
+             <div class="form-group full-width">
+                 <label>Varojen alkuperä:</label>
+                 <div class="checkbox-group">
+                     <label for="palkka">
+                         <input type="checkbox" id="palkka" name="palkka" value="palkka"> Palkkatulo
+                     </label>
+                     <label for="perinto">
+                         <input type="checkbox" id="perinto" name="perinto" value="perinto"> Perintö
+                     </label>
+                     <label for="sijoitukset">
+                         <input type="checkbox" id="sijoitukset" name="sijoitukset" value="sijoitukset"> Sijoitustoiminta
+                     </label>
+                     <label for="lahja">
+                         <input type="checkbox" id="lahja" name="lahja" value="lahja"> Lahja
+                     </label>
+                     <label for="saasto">
+                         <input type="checkbox" id="saasto" name="saasto" value="saasto"> Säästöt
+                     </label>
+                     <label for="muuvaraorig">
+                         <input type="checkbox" id="muuvaraorig" name="muuvaraorig" value="muuvaraorig"> Muu
+                     </label>
+                 </div>
+             </div>
+         
+             <!-- Erittele muu varojen alkuperä -->
+             <div class="form-group full-width">
+                 <label for="muuvaradeltalji">Erittele muu varojen alkuperä:</label>
+                 <input type="text" id="muuvaradetalji" name="muuvaradetalji" class="text-input" placeholder="Anna lisätiedot">
+             </div>
+         </div>
+         
+         <!-- Estimated Annual Income and Capital Income (Gross) -->
+         <div class="form-group">
+             <h4>Arvioidut ansio- ja pääomatulot vuodessa (brutto)</h4>
+             <div class="radio-group">
+                 <label>
+                     <input type="radio" name="tulot" value="kolmeviis" required> Alle 35 000 €
+                 </label>
+                 <label>
+                     <input type="radio" name="tulot" value="viivakuusviis" required> 35 000 € - 65 000 €
+                 </label>
+                 <label>
+                     <input type="radio" name="tulot" value="viivasata" required> 65 000 € - 100 000 €
+                 </label>
+                 <label>
+                     <input type="radio" name="tulot" value="sata" required> Yli 100 000 €
+                 </label>
+             </div>
+         </div>
+         
+         
+                   <!-- Varallisuuden jakautuminen Section -->
+         <div class="form-section">
+             <h4>Varallisuuden jakautuminen</h4>
+             <div class="form-columns">
+                 <!-- Rahasto-osuudet (€) -->
+                 <div class="form-group">
+                     <label for="rahastot">Rahasto-osuudet (€):</label>
+                     <input type="text" id="rahastot" name="rahastot">
+                 </div>
+                 
+                 <!-- Osakkeet (€) -->
+                 <div class="form-group">
+                     <label for="osakkeet">Osakkeet (€):</label>
+                     <input type="text" id="osakkeet" name="osakkeet">
+                 </div>
+                 
+                 <!-- Joukkovelkakirjalainat (€) -->
+                 <div class="form-group">
+                     <label for="joukkolainat">Joukkovelkakirjalainat (€):</label>
+                     <input type="text" id="joukkolainat" name="joukkolainat">
+                 </div>
+                 
+                 <!-- Talletukset ja rahamarkkinavälineet (€) -->
+                 <div class="form-group">
+                     <label for="talletukset">Talletukset ja rahamarkkinavälineet (€):</label>
+                     <input type="text" id="talletukset" name="talletukset">
+                 </div>
+                 
+                 <!-- Kiinteistöt ja asunto-osakkeet (€) -->
+                 <div class="form-group">
+                     <label for="asunnot">Kiinteistöt ja asunto-osakkeet (€):</label>
+                     <input type="text" id="asunnot" name="asunnot">
+                 </div>
+                 
+                 <!-- Muu, anna lisätiedot (€) -->
+                 <div class="form-group">
+                     <label for="muuvarajako">Muu, anna lisätiedot (€):</label>
+                     <input type="text" id="muuvaradetalji" name="muuvarajako">
+                 </div>
+             </div>
+         </div>
+         
+
+        <!-- Submit Button -->
+        <button type="submit">Lähetä tiedot</button>
+    </form>
+
+    <!-- Include scripts.js -->
+    <script src="scripts.js"></script>
+</body>
+</html>
