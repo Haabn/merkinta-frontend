@@ -1,3 +1,5 @@
+const API_URL = 'https://api.chatasilo.com/sopimus-api/consent';
+
 // Add both of these at the very top of your file
 window.addEventListener('error', function(e) {
     if (e.message && (
@@ -753,12 +755,12 @@ function createFormDataObject(formData) {
     
     
             let jsonString;
-            if (type === 'passport') {
-                jsonString = data;
-            } else {
-                const formDataObj = createFormDataObject(formData);
-                jsonString = JSON.stringify(formDataObj);
-            }
+if (type === 'passport') {
+    jsonString = formData; // Change from data to formData
+} else {
+    const formDataObj = createFormDataObject(formData);
+    jsonString = JSON.stringify(formDataObj);
+}
             console.log("Data to be encrypted:", jsonString.substring(0, 100) + "...");
     
             // Encrypt the serialized data using AES-CBC
