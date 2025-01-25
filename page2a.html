@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Asilo Asset Management - Yksityishenkilön Asiakassopimus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Add Forge library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/forge/0.10.0/forge.min.js"></script>
+</head>
+<body>
+
+
+    <!-- Header section -->
+    <div id="header" style="text-align:center; margin-bottom:20px;">
+        <h2>Yksityishenkilön Asiakassopimus</h2>
+        <p>Täytä kaikki kentät huolellisesti.</p>
+    </div>
+ 
+    <!-- Main form -->
+    <form id="customerForm" action="Page2b.html" method="get">
+        <!-- Hidden session ID field -->
+        <input type="hidden" id="sessionId" name="sessionId">
+        
+        <!-- General Information Section -->
+        <div class="form-section">
+            <h4>Yleiset tiedot</h4>
+            <div class="form-columns"
+                <!-- Osoite -->
+                <div class="form-group">
+                    <label for="Adress">Osoite:</label>
+                    <input type="text" id="Adress" name="Adress" required>
+                </div>
+                <!-- Postinumero -->
+                <div class="form-group">
+                    <label for="postinumero">Postinumero:</label>
+                    <input type="text" id="postinumero" name="postinumero" required>
+                </div>
+                <!-- Postitoimipaikka -->
+                <div class="form-group">
+                    <label for="postitoimipaikka">Postitoimipaikka:</label>
+                    <input type="text" id="postitoimipaikka" name="postitoimipaikka" required>
+                </div>
+                <!-- Puhelinnumero -->
+                <div class="form-group">
+                    <label for="puh">Puhelinnumero:</label>
+                    <input type="tel" id="puh" name="puh" required>
+                </div>
+                <!-- Sähköpostiosoite -->
+                <div class="form-group">
+                    <label for="email">Sähköpostiosoite:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <!-- Bank account number -->
+                <div class="form-group">
+                    <label for="tilinumero">Pankkitilin numero ja valuutta:</label>
+                    <input type="text" id="tilinumero" name="tilinumero" required>
+                </div>
+                <!-- Bank name and BIC -->
+                <div class="form-group">
+                    <label for="nimibic">Pankin nimi ja BIC:</label>
+                    <input type="text" id="nimibic" name="nimibic" required>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit">Lähetä tiedot</button>
+    </form>
+ 
+    <!-- JavaScript references at the end of body -->
+    <script src="scripts.js"></script>
+</body>
+</html>
