@@ -1265,4 +1265,4 @@ if (window.location.pathname.includes('page2d.html')) {
     }
 
 
-}); // closing bracket for DOMContentLoaded event listener
+}; // closing bracket for DOMContentLoaded event listener
