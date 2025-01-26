@@ -1263,6 +1263,6 @@ if (window.location.pathname.includes('page2d.html')) {
             performEncryption(formData);
        });
     }
-} // closing bracket for page2d.html conditional
+
 
 }); // closing bracket for DOMContentLoaded event listener
