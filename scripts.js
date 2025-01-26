@@ -24,41 +24,42 @@ window.addEventListener('warning', function(e) {
 });
 
 // Main script for handling form encryption and navigation
+// sopimus.html DOMContentLoaded listener
 document.addEventListener('DOMContentLoaded', async () => {
-  const token = getAuthToken();
-  if (!token) {
-    console.error("No auth token found."); // Add this log
-    window.location.href = 'index.html'; // Add redirect
-    return;
-  }
-
   try {
-    // Add logging before verification call
-    console.log("Making verification call with token:", token);
-    
+    const token = getAuthToken();
+    if (!token) {
+      console.error("No auth token found");
+      window.location.href = 'index.html';
+      return;
+    }
+
+    console.log("Attempting verification with token:", token);
+
     const response = await fetch('https://api.chatasilo.com/sopimus-api/consent/verify', {
-      method: 'POST',
+      method: 'POST', 
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       }
     });
 
-    // Add logging after verification call
-    console.log("Verification response:", response);
+    if (!response.ok) throw new Error('Verification failed');
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Verification failed');
+    // Initialize UI after verification
+    const consentCheckbox = document.getElementById('concent');
+    const proceedButton = document.getElementById('proceedButton');
+    if (consentCheckbox && proceedButton) {
+      consentCheckbox.addEventListener('change', () => {
+        proceedButton.disabled = !consentCheckbox.checked;
+      });
     }
-    const data = await response.json();
-    console.log("Verification success:", data);
 
-  } catch (err) {
-    console.error("Verification error:", err);
+  } catch (error) {
+    console.error("Error:", error);
     window.location.href = 'index.html';
-    return;
   }
+});
     function checkSessionValidity() {
     const authToken = sessionStorage.getItem('authToken');
     const timestamp = sessionStorage.getItem('authTimestamp');
@@ -246,46 +247,6 @@ function validateForm() {
     }
     return isValid;
 }
-// sopimus form handling
-if (window.location.pathname.includes('sopimus.html')) {
-  document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Attempt the verification call to get Name1/ID into the logs
-    const token = getAuthToken();
-    if (!token) {
-      console.error("No auth token found.");
-      return;
-    }
-
-    try {
-      const response = await fetch('https://api.chatasilo.com/sopimus-api/consent/verify', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Verification failed');
-      }
-      const data = await response.json();
-      console.log("Verification success:", data);
-
-    } catch (err) {
-      console.error("Verification error:", err);
-    }
-
-    // 2. Original UI logic for the "Consent" form
-    const sopimusForm = document.getElementById('customerForm');
-    const consentCheckbox = document.getElementById('concent');
-    const proceedButton = document.getElementById('proceedButton');
-
-    if (consentCheckbox && proceedButton) {
-      consentCheckbox.addEventListener('change', function () {
-        proceedButton.disabled = !this.checked;
-      });
-    }
 
   if (sopimusForm) {
   sopimusForm.addEventListener('submit', async function(e) {
