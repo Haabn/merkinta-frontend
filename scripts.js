@@ -24,29 +24,41 @@ window.addEventListener('warning', function(e) {
 });
 
 // Main script for handling form encryption and navigation
-document.addEventListener('DOMContentLoaded', function() {
-    console.log("scripts.js loaded successfully.");
-function getAuthToken() {
-    const storedToken = sessionStorage.getItem('authToken');
-    if (storedToken) {
-        return checkSessionValidity() ? storedToken : null;
-    }
+document.addEventListener('DOMContentLoaded', async () => {
+  const token = getAuthToken();
+  if (!token) {
+    console.error("No auth token found."); // Add this log
+    window.location.href = 'index.html'; // Add redirect
+    return;
+  }
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const authData = urlParams.get('auth_data');
-    if (!authData) {
-        return null;
-    }
+  try {
+    // Add logging before verification call
+    console.log("Making verification call with token:", token);
+    
+    const response = await fetch('https://api.chatasilo.com/sopimus-api/consent/verify', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
 
-    try {
-        const decodedData = JSON.parse(atob(authData));
-        sessionStorage.setItem('authToken', decodedData.sessionToken);
-        sessionStorage.setItem('authTimestamp', Date.now().toString());
-        return decodedData.sessionToken;
-    } catch (error) {
-        return null;
+    // Add logging after verification call
+    console.log("Verification response:", response);
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Verification failed');
     }
-}
+    const data = await response.json();
+    console.log("Verification success:", data);
+
+  } catch (err) {
+    console.error("Verification error:", err);
+    window.location.href = 'index.html';
+    return;
+  }
     function checkSessionValidity() {
     const authToken = sessionStorage.getItem('authToken');
     const timestamp = sessionStorage.getItem('authTimestamp');
@@ -275,13 +287,23 @@ if (window.location.pathname.includes('sopimus.html')) {
       });
     }
 
-    if (sopimusForm) {
-      sopimusForm.addEventListener('submit', function (e) {
-        e.preventDefault();
-        const formData = new FormData(this);
-        // This encrypts & sends your “sopimus” data to the backend
-        performEncryption(formData);
-      });
+  if (sopimusForm) {
+  sopimusForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    // Add loading state
+    const submitButton = this.querySelector('button[type="submit"]');
+    if (submitButton) submitButton.disabled = true;
+    
+    try {
+      const formData = new FormData(this);
+      await performEncryption(formData);
+    } catch (error) {
+      console.error('Form submission error:', error);
+      // Show error to user
+      alert('Virhe lomakkeen lähetyksessä. Yritä uudelleen.');
+    } finally {
+      if (submitButton) submitButton.disabled = false;
     }
   });
 }
