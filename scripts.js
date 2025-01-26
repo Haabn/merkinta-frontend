@@ -49,6 +49,7 @@ function checkSession() {
     }
 }
     function handleSessionResponse(responseData, step) {
+    console.log('handleSessionResponse:', { responseData, step });
     if (responseData.nextPage) {
         window.location.href = responseData.nextPage;
     }
@@ -575,8 +576,6 @@ function createFormDataObject(formData) {
             concent: formData.has('concent')
         };
         console.log('sopimus.html form data:', formDataObj);
-    }
-
 
     }
     else if (currentPage.includes('page1a.html')) {
@@ -832,6 +831,8 @@ if (type === 'passport') {
             },
             body: JSON.stringify(payload)
         });
+            
+            console.log('Raw response:', response);
 
         if (!response.ok) {
             const errorData = await response.json();
