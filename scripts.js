@@ -576,7 +576,7 @@ function createFormDataObject(formData) {
             concent: formData.has('concent')
         };
         console.log('sopimus.html form data:', formDataObj);
-
+        return formDataObj;
     }
     else if (currentPage.includes('page1a.html')) {
         formDataObj = {
@@ -833,6 +833,7 @@ if (type === 'passport') {
         });
             
             console.log('Raw response:', response);
+            console.log('Response status:', response.status);
 
         if (!response.ok) {
             const errorData = await response.json();
