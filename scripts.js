@@ -236,25 +236,54 @@ function validateForm() {
 }
 // sopimus form handling
 if (window.location.pathname.includes('sopimus.html')) {
+  document.addEventListener('DOMContentLoaded', async () => {
+    // 1. Attempt the verification call to get Name1/ID into the logs
+    const token = getAuthToken();
+    if (!token) {
+      console.error("No auth token found.");
+      return;
+    }
+
+    try {
+      const response = await fetch('https://api.chatasilo.com/sopimus-api/consent/verify', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Verification failed');
+      }
+      const data = await response.json();
+      console.log("Verification success:", data);
+
+    } catch (err) {
+      console.error("Verification error:", err);
+    }
+
+    // 2. Original UI logic for the "Consent" form
     const sopimusForm = document.getElementById('customerForm');
     const consentCheckbox = document.getElementById('concent');
     const proceedButton = document.getElementById('proceedButton');
 
-    if (consentCheckbox) {
-        consentCheckbox.addEventListener('change', function() {
-            if (proceedButton) {
-                proceedButton.disabled = !this.checked;
-            }
-        });
+    if (consentCheckbox && proceedButton) {
+      consentCheckbox.addEventListener('change', function () {
+        proceedButton.disabled = !this.checked;
+      });
     }
 
     if (sopimusForm) {
-        sopimusForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            performEncryption(formData);
-        });
+      sopimusForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        // This encrypts & sends your “sopimus” data to the backend
+        performEncryption(formData);
+      });
     }
+  });
 }
 
 // Page1a form handling
