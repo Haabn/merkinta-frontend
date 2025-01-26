@@ -207,8 +207,28 @@ function validateForm() {
     }
     return isValid;
 }
+// sopimus form handling
+if (window.location.pathname.includes('sopimus.html')) {
+    const sopimusForm = document.getElementById('customerForm');
+    const consentCheckbox = document.getElementById('concent');
+    const proceedButton = document.getElementById('proceedButton');
 
+    if (consentCheckbox) {
+        consentCheckbox.addEventListener('change', function() {
+            if (proceedButton) {
+                proceedButton.disabled = !this.checked;
+            }
+        });
+    }
 
+    if (sopimusForm) {
+        sopimusForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            performEncryption(formData);
+        });
+    }
+}
 
 // Page1a form handling
 if (window.location.pathname.includes('page1a.html')) {
@@ -546,18 +566,16 @@ if (page3Elements.form) {
 }
 }
                 
-
 function createFormDataObject(formData) {
-    // Get current page
     const currentPage = window.location.pathname;
-    
-    // Base object with common fields
     let formDataObj = {};
-
-   if (currentPage.includes('sopimus.html')) {
-    formDataObj = {
-        concent: formData.has('concent'),
-    };
+    
+    if (currentPage.includes('sopimus.html')) {
+        formDataObj = {
+            concent: formData.has('concent')
+        };
+        console.log('sopimus.html form data:', formDataObj);
+    }
 
 
     }
@@ -806,26 +824,37 @@ if (type === 'passport') {
         };
             
             // Send to backend
-            const response = await fetch(`${API_URL}/decrypt`, {
+             const response = await fetch(`${API_URL}/decrypt`, {
             method: 'POST',
-            headers,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
             body: JSON.stringify(payload)
-            });
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Server response:', errorData);
+            throw new Error(errorData.message || 'Backend request failed');
+        }
     
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Backend request failed');
-            }
-    
-            const responseData = await response.json();
-            handleSessionResponse(responseData, step);
-            updateUIState();
-    
-         } catch (error) {
+             const responseData = await response.json();
+        console.log('Server response:', responseData);
+        
+        if (responseData.nextPage) {
+            window.location.href = responseData.nextPage;
+        } else {
+            throw new Error('No next page specified in response');
+        }
+
+    } catch (error) {
+        console.error('Encryption error:', error);
         if (error.message.includes('Authentication required')) {
             window.location.href = 'index.html';
+        } else {
+            handleUIError(error);
         }
-        handleUIError(error);
     }
 }
            
