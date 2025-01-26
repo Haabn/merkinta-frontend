@@ -1,122 +1,57 @@
 <!DOCTYPE html>
 <html lang="fi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Asilo Asset Management - Tietosuojaseloste ja Suostumus</title>
-  <link rel="stylesheet" href="styles0.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/forge/0.10.0/forge.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asilo Asset Management - Tietosuojaseloste ja Suostumus</title>
+    <!-- Link to Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Link to External CSS File -->
+    <link rel="stylesheet" href="styles0.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/forge/0.10.0/forge.min.js"></script>
+    
 </head>
 <body>
 
-  <header>
-    <h1>Asilo Asset Management</h1>
-    <h2>Tietosuojaseloste ja Suostumus</h2>
-  </header>
-
-  <div class="confirmation-box">
-    <div class="security-info">
-      <h3>Tämän digitaalisen sopimuksentekoprosessin tietoturva:</h3>
-      <ol>
-        <li>Keräämme tiedot näillä nettisivuilla.</li>
-        <li>Asilo tarkistaa tiedot.</li>
-        <li>Lähetämme VismaSign-linkin allekirjoitusta varten.</li>
-      </ol>
-    </div>
-
-    <div class="pdf-links">
-      <div class="pdf-item">
-        <a href="AsiloPrivatePolicy.pdf" target="_blank">
-          <img src="pdf.jpeg" alt="Tietosuojaseloste PDF" class="pdf-icon">
-          <p>Tietosuojaseloste</p>
-        </a>
-      </div>
-    </div>
-
-    <div class="checkbox-group">
-      <form id="page0Form">
-        <label>
-          <input type="checkbox" id="concent" name="concent" required>
-          Olen lukenut ja hyväksyn Asilon tietoturvakäytänteet.
-        </label>
-        <div class="proceed-button">
-          <button type="submit" id="proceedButton" disabled>Jatka</button>
+    <!-- Header Section -->
+    <header>
+        <h1>Asilo Asset Management</h1>
+        <h2>Tietosuojaseloste ja Suostumus</h2>
+    </header>
+    <div class="confirmation-box">
+        <div class="security-info">
+            <h3>Tämän digitaalisen sopimuksentekoprosessin tietoturva toimii seuraavalla tavalla:</h3>
+            <ol>
+                <li>Sopimuksentekoon tarvittavat tiedot kerätään näillä nettisivuilla.
+                <li>Asiakkaan lähettämät tiedot kootaan yhteen ja tiedot käydään läpi Asilon toimesta.</li>
+                <li>Asilo lähettää asiakkaalle Vismasign linkin sopimuksen allekirjoittamista varten.</li>
+            </ol>
         </div>
-      </form>
+
+    <!-- Confirmation Box -->
+    <div class="confirmation-box">
+        <!-- PDF Links Section -->
+        <div class="pdf-links">
+            <div class="pdf-item">
+                <a href="AsiloPrivatePolicy.pdf" target="_blank">
+                    <img src="pdf.jpeg" alt="Tietosuojaseloste PDF" class="pdf-icon">
+                    <p>Tietosuojaseloste</p>
+                </a>
+            </div>
+        </div>
+         <!-- Checkbox Group -->
+         <div class="checkbox-group">
+            <form id="page0Form">
+                <label>
+                    <input type="checkbox" id="concent" name="concent" required>
+                    Olen lukenut ja hyväksyn Asilon tietoturvakäytänteet.
+                </label>
+                <div class="proceed-button">
+                    <button type="submit" id="proceedButton" disabled>Jatka</button>
+                </div>
+            </form>
+        </div>
     </div>
-  </div>
-
-  <!-- Your main script at bottom -->
-  <script>
-    // Simple placeholder for getAuthToken() - adapt as needed
-    function getAuthToken() {
-      // Example: read from sessionStorage
-      return sessionStorage.getItem('authToken');
-    }
-
-    // Enhanced DOMContentLoaded with full logging
-    document.addEventListener('DOMContentLoaded', async () => {
-      console.log("[sopimus] DOMContentLoaded fired on Tietosuojaseloste page.");
-
-      try {
-        const token = getAuthToken();
-        console.log("[sopimus] getAuthToken() returned:", token);
-
-        if (!token) {
-          console.error("[sopimus] No auth token found → redirecting to index.html");
-          window.location.href = "index.html";
-          return;
-        }
-
-        console.log("[sopimus] Attempting verification fetch with token:", token);
-        let response;
-        try {
-          response = await fetch("https://api.chatasilo.com/sopimus-api/consent/verify", {
-            method: "POST",
-            headers: {
-              "Authorization": `Bearer ${token}`,
-              "Content-Type": "application/json"
-            }
-          });
-        } catch (networkErr) {
-          console.error("[sopimus] Network/CORS fetch error:", networkErr);
-          throw new Error("Network error contacting server");
-        }
-
-        console.log("[sopimus] Response status code:", response.status);
-
-        let responseBody = null;
-        try {
-          responseBody = await response.json();
-        } catch (jsonErr) {
-          console.warn("[sopimus] Could not parse verify response as JSON:", jsonErr);
-        }
-        console.log("[sopimus] Response body:", responseBody);
-
-        if (!response.ok) {
-          // For 401, 500, etc.
-          const msg = responseBody?.message || responseBody?.error || "Verification failed";
-          throw new Error(`[sopimus] Server returned ${response.status}: ${msg}`);
-        }
-
-        console.log("[sopimus] Verification success; setting up checkbox logic...");
-
-        // Now bind the checkbox & button
-        const consentCheckbox = document.getElementById('concent');
-        const proceedButton = document.getElementById('proceedButton');
-        if (consentCheckbox && proceedButton) {
-          consentCheckbox.addEventListener('change', () => {
-            proceedButton.disabled = !consentCheckbox.checked;
-          });
-        } else {
-          console.warn("[sopimus] Did not find #concent or #proceedButton in the DOM.");
-        }
-
-      } catch (error) {
-        console.error("[sopimus] DOMContentLoaded error:", error);
-        window.location.href = "index.html";
-      }
-    });
-  </script>
+    <script src="scripts.js"></script>
 </body>
 </html>
