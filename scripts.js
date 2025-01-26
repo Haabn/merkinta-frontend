@@ -28,25 +28,52 @@ window.addEventListener('warning', function(e) {
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     const token = getAuthToken();
+    
     if (!token) {
-      console.error("No auth token found");
+      console.error("[sopimus] No auth token found in getAuthToken()");
       window.location.href = 'index.html';
       return;
     }
 
-    console.log("Attempting verification with token:", token);
+    console.log("[sopimus] Attempting verification with token:", token);
 
-    const response = await fetch('https://api.chatasilo.com/sopimus-api/consent/verify', {
-      method: 'POST', 
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    });
+    let response;
+    try {
+      response = await fetch('https://api.chatasilo.com/sopimus-api/consent/verify', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+    } catch (networkError) {
+      // This catch block is triggered if the fetch fails completely:
+      // e.g. DNS issues, firewall, or CORS preflight errors.
+      console.error("[sopimus] Network/CORS fetch error:", networkError);
+      throw new Error("Network error contacting backend");
+    }
 
-    if (!response.ok) throw new Error('Verification failed');
+    console.log("[sopimus] Response status:", response.status);
 
-    // Initialize UI after verification
+    let responseBody = null;
+    try {
+      responseBody = await response.json();
+    } catch (jsonError) {
+      console.warn("[sopimus] Could not parse verify response as JSON:", jsonError);
+      // Possibly the backend responded with non-JSON or no body
+    }
+
+    console.log("[sopimus] Response body:", responseBody);
+
+    if (!response.ok) {
+      // For example 401 or 500
+      const errorMsg = responseBody?.message || responseBody?.error || "Verification failed";
+      throw new Error(`[sopimus] Server returned ${response.status}: ${errorMsg}`);
+    }
+
+    // If we reach here, we have a successful 2xx response
+    console.log("[sopimus] Verification success; proceeding to UI init");
+
     const consentCheckbox = document.getElementById('concent');
     const proceedButton = document.getElementById('proceedButton');
     if (consentCheckbox && proceedButton) {
@@ -56,30 +83,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
   } catch (error) {
-    console.error("Error:", error);
+    console.error("[sopimus] Verification error in DOMContentLoaded:", error);
     window.location.href = 'index.html';
   }
 });
-    function checkSessionValidity() {
-    const authToken = sessionStorage.getItem('authToken');
-    const timestamp = sessionStorage.getItem('authTimestamp');
-    
-    if (!authToken || !timestamp) {
-        window.location.href = 'index.html';
-        return false;
-    }
-
-    const timeDiff = Date.now() - parseInt(timestamp);
-    const timeoutMinutes = 60;
-    
-    if (timeDiff > timeoutMinutes * 60 * 1000) {
-        sessionStorage.clear();
-        window.location.href = 'index.html';
-        return false;
-    }
-    
-    return true;
-}
 function checkSession() {
     const token = getAuthToken();
     if (!token || !checkSessionValidity()) {
