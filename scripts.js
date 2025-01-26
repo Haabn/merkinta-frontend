@@ -1,45 +1,86 @@
 const API_URL = 'https://api.chatasilo.com/sopimus-api/consent';
 
-// Add both of these at the very top of your file
+// Prevent certain console warnings about cookies (your existing code):
 window.addEventListener('error', function(e) {
-    if (e.message && (
-        e.message.includes('cookie') || 
-        e.message.includes('Cookie') ||
-        e.message.includes('__vercel_live_token') ||
-        e.message.includes('SameSite')
-    )) {
-        e.preventDefault();
-    }
+  if (
+    e.message &&
+    (
+      e.message.includes('cookie') || 
+      e.message.includes('Cookie') ||
+      e.message.includes('__vercel_live_token') ||
+      e.message.includes('SameSite')
+    )
+  ) {
+    e.preventDefault();
+  }
 });
-
 window.addEventListener('warning', function(e) {
-    if (e.message && (
-        e.message.includes('cookie') || 
-        e.message.includes('Cookie') ||
-        e.message.includes('__vercel_live_token') ||
-        e.message.includes('SameSite')
-    )) {
-        e.preventDefault();
-    }
+  if (
+    e.message &&
+    (
+      e.message.includes('cookie') || 
+      e.message.includes('Cookie') ||
+      e.message.includes('__vercel_live_token') ||
+      e.message.includes('SameSite')
+    )
+  ) {
+    e.preventDefault();
+  }
 });
 
-// Main script for handling form encryption and navigation
-// sopimus.html DOMContentLoaded listener
-document.addEventListener('DOMContentLoaded', async () => {
+// 1) Parse auth_data from URL → store in sessionStorage
+function parseSopimusAuthData() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const authDataParam = urlParams.get('auth_data');
+  
+  if (!authDataParam) {
+    console.log('[sopimus] parseSopimusAuthData: no auth_data in URL → no token to parse');
+    return;
+  }
+
   try {
-    const token = getAuthToken();
-    
+    const decodedString = atob(authDataParam);
+    const parsed = JSON.parse(decodedString);
+    if (!parsed.authenticated || !parsed.sessionToken) {
+      throw new Error('Invalid auth data');
+    }
+
+    sessionStorage.setItem('authToken', parsed.sessionToken);
+    sessionStorage.setItem('authTimestamp', Date.now().toString());
+
+    console.log('[sopimus] parseSopimusAuthData: stored token:', parsed.sessionToken);
+
+  } catch (err) {
+    console.error('[sopimus] parseSopimusAuthData: error parsing auth_data:', err);
+    window.location.href = 'index.html';
+  }
+}
+
+// 2) On DOMContentLoaded, do parseSopimusAuthData → then do fetch
+document.addEventListener('DOMContentLoaded', async () => {
+  // Only do this logic if we’re on sopimus.html
+  if (!window.location.pathname.includes('sopimus.html')) return;
+
+  console.log('[sopimus] DOMContentLoaded on sopimus.html');
+  
+  // First parse the token from URL (if present)
+  parseSopimusAuthData();
+
+  try {
+    const token = getAuthToken(); // you have a function that reads sessionStorage
+    console.log('[sopimus] getAuthToken() returned:', token);
+
     if (!token) {
-      console.error("[sopimus] No auth token found in getAuthToken()");
+      console.error('[sopimus] No auth token found in getAuthToken() -> redirecting to index.html');
       window.location.href = 'index.html';
       return;
     }
 
-    console.log("[sopimus] Attempting verification with token:", token);
-
+    console.log('[sopimus] Attempting verification fetch with token:', token);
+    
     let response;
     try {
-      response = await fetch('https://api.chatasilo.com/sopimus-api/consent/verify', {
+      response = await fetch(`${API_URL}/verify`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -47,43 +88,41 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       });
     } catch (networkError) {
-      // This catch block is triggered if the fetch fails completely:
-      // e.g. DNS issues, firewall, or CORS preflight errors.
-      console.error("[sopimus] Network/CORS fetch error:", networkError);
-      throw new Error("Network error contacting backend");
+      console.error('[sopimus] Network/CORS fetch error:', networkError);
+      throw new Error('Network error contacting backend');
     }
 
-    console.log("[sopimus] Response status:", response.status);
+    console.log('[sopimus] Response status:', response.status);
 
     let responseBody = null;
     try {
       responseBody = await response.json();
     } catch (jsonError) {
-      console.warn("[sopimus] Could not parse verify response as JSON:", jsonError);
-      // Possibly the backend responded with non-JSON or no body
+      console.warn('[sopimus] Could not parse verify response as JSON:', jsonError);
     }
-
-    console.log("[sopimus] Response body:", responseBody);
+    console.log('[sopimus] Response body:', responseBody);
 
     if (!response.ok) {
-      // For example 401 or 500
-      const errorMsg = responseBody?.message || responseBody?.error || "Verification failed";
+      // e.g. 401, 500
+      const errorMsg = responseBody?.message || responseBody?.error || 'Verification failed';
       throw new Error(`[sopimus] Server returned ${response.status}: ${errorMsg}`);
     }
 
-    // If we reach here, we have a successful 2xx response
-    console.log("[sopimus] Verification success; proceeding to UI init");
-
+    // If successful, initialize the UI
+    console.log('[sopimus] Verification success; proceeding to UI init');
+    
     const consentCheckbox = document.getElementById('concent');
     const proceedButton = document.getElementById('proceedButton');
     if (consentCheckbox && proceedButton) {
       consentCheckbox.addEventListener('change', () => {
         proceedButton.disabled = !consentCheckbox.checked;
       });
+    } else {
+      console.warn('[sopimus] Did not find #concent or #proceedButton elements');
     }
 
   } catch (error) {
-    console.error("[sopimus] Verification error in DOMContentLoaded:", error);
+    console.error('[sopimus] Verification error in DOMContentLoaded:', error);
     window.location.href = 'index.html';
   }
 });
