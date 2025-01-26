@@ -26,28 +26,54 @@ window.addEventListener('warning', function(e) {
 // Main script for handling form encryption and navigation
 document.addEventListener('DOMContentLoaded', function() {
     console.log("scripts.js loaded successfully.");
-
 function getAuthToken() {
+    const storedToken = sessionStorage.getItem('authToken');
+    if (storedToken) {
+        return checkSessionValidity() ? storedToken : null;
+    }
+
     const urlParams = new URLSearchParams(window.location.search);
     const authData = urlParams.get('auth_data');
     if (!authData) {
-        window.location.href = 'index.html';
         return null;
     }
+
     try {
         const decodedData = JSON.parse(atob(authData));
+        sessionStorage.setItem('authToken', decodedData.sessionToken);
+        sessionStorage.setItem('authTimestamp', Date.now().toString());
         return decodedData.sessionToken;
     } catch (error) {
-        window.location.href = 'index.html';
         return null;
     }
+}
+    function checkSessionValidity() {
+    const authToken = sessionStorage.getItem('authToken');
+    const timestamp = sessionStorage.getItem('authTimestamp');
+    
+    if (!authToken || !timestamp) {
+        window.location.href = 'index.html';
+        return false;
+    }
+
+    const timeDiff = Date.now() - parseInt(timestamp);
+    const timeoutMinutes = 60;
+    
+    if (timeDiff > timeoutMinutes * 60 * 1000) {
+        sessionStorage.clear();
+        window.location.href = 'index.html';
+        return false;
+    }
+    
+    return true;
 }
 function checkSession() {
     const token = getAuthToken();
-    if (!token) {
+    if (!token || !checkSessionValidity()) {
         window.location.href = 'index.html';
     }
 }
+
     function handleSessionResponse(responseData, step) {
     console.log('handleSessionResponse:', { responseData, step });
     if (responseData.nextPage) {
