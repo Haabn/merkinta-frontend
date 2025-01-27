@@ -28,7 +28,7 @@ window.addEventListener('warning', function(e) {
   }
 });
 
-const API_URL = 'https://api.chatasilo.com/sopimus-api/consent';
+
 const SESSION_TIMEOUT_MINUTES = 60;
 const SESSION_KEY = 'authSession';
 
