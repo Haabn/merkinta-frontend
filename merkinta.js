@@ -197,7 +197,7 @@ async function submitFormData(formData, token) {
     const encryptedData = encryptDataForTransmission(formDataObj);
     logs.push('Encrypted data: ' + JSON.stringify(encryptedData, null, 2));
     
-    const response = await fetchawait fetch(`${API_URL}/decrypt`, {
+    await fetch(`${apiUrl}/merkinta/decrypt`, {
 
         method: 'POST',
         headers: {
