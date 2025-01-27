@@ -231,6 +231,7 @@ const maxFileSize = 5 * 1024 * 1024; // 5MB
 const tempStorage = new Map();
 
 const sopimusElements = {
+    form: document.getElementById('sopimusForm'),  // Add this line
     consentCheckbox: document.getElementById('concent'),
     proceedButton: document.getElementById('proceedButton')
 };
@@ -374,25 +375,23 @@ function validateForm() {
     return isValid;
 }
 
-  if (sopimusForm) {
-  sopimusForm.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    // Add loading state
-    const submitButton = this.querySelector('button[type="submit"]');
-    if (submitButton) submitButton.disabled = true;
-    
-    try {
-      const formData = new FormData(this);
-      await performEncryption(formData);
-    } catch (error) {
-      console.error('Form submission error:', error);
-      // Show error to user
-      alert('Virhe lomakkeen lähetyksessä. Yritä uudelleen.');
-    } finally {
-      if (submitButton) submitButton.disabled = false;
-    }
-  });
+if (sopimusElements.form) {
+    sopimusElements.form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const submitButton = this.querySelector('button[type="submit"]');
+        if (submitButton) submitButton.disabled = true;
+        
+        try {
+            const formData = new FormData(this);
+            await performEncryption(formData);
+        } catch (error) {
+            console.error('Form submission error:', error);
+            alert('Virhe lomakkeen lähetyksessä. Yritä uudelleen.');
+        } finally {
+            if (submitButton) submitButton.disabled = false;
+        }
+    });
 }
 
 // Page1a form handling
