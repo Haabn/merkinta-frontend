@@ -28,114 +28,194 @@ window.addEventListener('warning', function(e) {
   }
 });
 
-// 1) Parse auth_data from URL → store in sessionStorage
-function parseSopimusAuthData() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const authDataParam = urlParams.get('auth_data');
-  
-  if (!authDataParam) {
-    console.log('[sopimus] parseSopimusAuthData: no auth_data in URL → no token to parse');
-    return;
-  }
+const API_URL = 'https://api.chatasilo.com/sopimus-api/consent';
+const SESSION_TIMEOUT_MINUTES = 60;
+const SESSION_KEY = 'authSession';
 
-  try {
-    const decodedString = atob(authDataParam);
-    const parsed = JSON.parse(decodedString);
-    if (!parsed.authenticated || !parsed.sessionToken) {
-      throw new Error('Invalid auth data');
-    }
-
-    sessionStorage.setItem('authToken', parsed.sessionToken);
-    sessionStorage.setItem('authTimestamp', Date.now().toString());
-
-    console.log('[sopimus] parseSopimusAuthData: stored token:', parsed.sessionToken);
-
-  } catch (err) {
-    console.error('[sopimus] parseSopimusAuthData: error parsing auth_data:', err);
-    window.location.href = 'index.html';
-  }
+// Session management utilities
+function parseISO8601(timestamp) {
+    return new Date(timestamp);
 }
 
-// 2) On DOMContentLoaded, do parseSopimusAuthData → then do fetch
-document.addEventListener('DOMContentLoaded', async () => {
-  // Only do this logic if we’re on sopimus.html
-  if (!window.location.pathname.includes('sopimus.html')) return;
+function addMinutes(date, minutes) {
+    return new Date(date.getTime() + minutes * 60000);
+}
 
-  console.log('[sopimus] DOMContentLoaded on sopimus.html');
-  
-  // First parse the token from URL (if present)
-  parseSopimusAuthData();
-
-  try {
-    const token = getAuthToken(); // you have a function that reads sessionStorage
-    console.log('[sopimus] getAuthToken() returned:', token);
-
-    if (!token) {
-      console.error('[sopimus] No auth token found in getAuthToken() -> redirecting to index.html');
-      window.location.href = 'index.html';
-      return;
+// Validate session with logging
+function validateSession(sessionData) {
+    if (!sessionData?.timestamp || !sessionData?.sessionToken) {
+        console.log('[Session] Invalid session data structure:', sessionData);
+        return false;
     }
 
-    console.log('[sopimus] Attempting verification fetch with token:', token);
+    const expiryTime = addMinutes(parseISO8601(sessionData.timestamp), SESSION_TIMEOUT_MINUTES);
+    const isValid = new Date() < expiryTime;
     
-    let response;
+    console.log('[Session] Validation check:', {
+        sessionToken: sessionData.sessionToken,
+        timestamp: sessionData.timestamp,
+        expiryTime: expiryTime.toISOString(),
+        remainingMinutes: Math.round((expiryTime - new Date()) / 60000),
+        isValid
+    });
+
+    return isValid;
+}
+
+// Get auth token with validation
+function getAuthToken() {
     try {
-      response = await fetch(`${API_URL}/verify`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+        const sessionData = JSON.parse(sessionStorage.getItem(SESSION_KEY));
+        if (!sessionData) {
+            console.log('[Session] No session data found');
+            return null;
         }
-      });
-    } catch (networkError) {
-      console.error('[sopimus] Network/CORS fetch error:', networkError);
-      throw new Error('Network error contacting backend');
+
+        if (!validateSession(sessionData)) {
+            console.log('[Session] Session has expired');
+            sessionStorage.removeItem(SESSION_KEY);
+            return null;
+        }
+
+        return sessionData.sessionToken;
+    } catch (error) {
+        console.error('[Session] Error reading session:', error);
+        return null;
     }
+}
 
-    console.log('[sopimus] Response status:', response.status);
-
-    let responseBody = null;
-    try {
-      responseBody = await response.json();
-    } catch (jsonError) {
-      console.warn('[sopimus] Could not parse verify response as JSON:', jsonError);
-    }
-    console.log('[sopimus] Response body:', responseBody);
-
-    if (!response.ok) {
-      // e.g. 401, 500
-      const errorMsg = responseBody?.message || responseBody?.error || 'Verification failed';
-      throw new Error(`[sopimus] Server returned ${response.status}: ${errorMsg}`);
-    }
-
-    // If successful, initialize the UI
-    console.log('[sopimus] Verification success; proceeding to UI init');
+// Parse auth data from URL and store in sessionStorage
+function parseSopimusAuthData() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const authDataParam = urlParams.get('auth_data');
     
-    const consentCheckbox = document.getElementById('concent');
-    const proceedButton = document.getElementById('proceedButton');
-    if (consentCheckbox && proceedButton) {
-      consentCheckbox.addEventListener('change', () => {
-        proceedButton.disabled = !consentCheckbox.checked;
-      });
-    } else {
-      console.warn('[sopimus] Did not find #concent or #proceedButton elements');
+    if (!authDataParam) {
+        console.log('[Sopimus] No auth_data in URL → no token to parse');
+        return;
     }
 
-  } catch (error) {
-    console.error('[sopimus] Verification error in DOMContentLoaded:', error);
-    window.location.href = 'index.html';
-  }
-});
-function checkSession() {
-    const token = getAuthToken();
-    if (!token || !checkSessionValidity()) {
+    try {
+        const decodedString = atob(authDataParam);
+        const parsed = JSON.parse(decodedString);
+        console.log('[Sopimus] Parsed auth data:', parsed);
+
+        if (!parsed.authenticated || !parsed.sessionToken || !parsed.timestamp) {
+            throw new Error('Invalid auth data structure');
+        }
+
+        const sessionData = {
+            sessionToken: parsed.sessionToken,
+            timestamp: parsed.timestamp,
+            authenticated: parsed.authenticated
+        };
+
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
+        console.log('[Sopimus] Session stored:', sessionData);
+
+    } catch (err) {
+        console.error('[Sopimus] Error parsing auth_data:', err);
         window.location.href = 'index.html';
     }
 }
 
-    function handleSessionResponse(responseData, step) {
-    console.log('handleSessionResponse:', { responseData, step });
+// Initialize page and verify session
+document.addEventListener('DOMContentLoaded', async () => {
+    if (!window.location.pathname.includes('sopimus.html')) return;
+    console.log('[Sopimus] DOMContentLoaded on sopimus.html');
+    
+    parseSopimusAuthData();
+
+    try {
+        const token = getAuthToken();
+        console.log('[Sopimus] getAuthToken returned:', token);
+
+        if (!token) {
+            console.error('[Sopimus] No auth token found → redirecting to index.html');
+            window.location.href = 'index.html';
+            return;
+        }
+
+        // Verify session with backend
+        console.log('[Sopimus] Verifying token with backend:', token);
+        let response;
+        try {
+            response = await fetch(`${API_URL}/verify`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+        } catch (networkError) {
+            console.error('[Sopimus] Network/CORS error:', networkError);
+            throw new Error('Network error contacting backend');
+        }
+
+        console.log('[Sopimus] Verify response status:', response.status);
+        
+        let responseBody = null;
+        try {
+            responseBody = await response.json();
+        } catch (jsonError) {
+            console.warn('[Sopimus] Could not parse verify response as JSON:', jsonError);
+        }
+        console.log('[Sopimus] Verify response body:', responseBody);
+
+        if (!response.ok) {
+            const errorMsg = responseBody?.message || responseBody?.error || 'Verification failed';
+            throw new Error(`[Sopimus] Server returned ${response.status}: ${errorMsg}`);
+        }
+
+        // Initialize UI after successful verification
+        console.log('[Sopimus] Verification success; initializing UI');
+        
+        const consentCheckbox = document.getElementById('concent');
+        const proceedButton = document.getElementById('proceedButton');
+        if (consentCheckbox && proceedButton) {
+            consentCheckbox.addEventListener('change', () => {
+                proceedButton.disabled = !consentCheckbox.checked;
+            });
+        } else {
+            console.warn('[Sopimus] Did not find #concent or #proceedButton elements');
+        }
+
+    } catch (error) {
+        console.error('[Sopimus] Verification error:', error);
+        window.location.href = 'index.html';
+    }
+});
+
+// Check session validity
+function checkSession() {
+    const token = getAuthToken();
+    const isValid = validateSession(JSON.parse(sessionStorage.getItem(SESSION_KEY)));
+    
+    console.log('[Session] Check:', {
+        hasToken: !!token,
+        isValid: isValid
+    });
+
+    if (!token || !isValid) {
+        console.log('[Session] Invalid session → redirecting to index');
+        window.location.href = 'index.html';
+        return false;
+    }
+    
+    return true;
+}
+
+// Handle session response
+function handleSessionResponse(responseData, step) {
+    console.log('[Session] Handling response:', { step, responseData });
+    
+    if (!checkSession()) {
+        console.log('[Session] Session invalid during response handling');
+        window.location.href = 'index.html';
+        return;
+    }
+
     if (responseData.nextPage) {
+        console.log('[Session] Proceeding to:', responseData.nextPage);
         window.location.href = responseData.nextPage;
     }
 }
