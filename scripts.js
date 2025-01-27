@@ -135,36 +135,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        // Verify session with backend
-        console.log('[Sopimus] Verifying token with backend:', token);
-        let response;
-        try {
-            response = await fetch(`${API_URL}/verify`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-        } catch (networkError) {
-            console.error('[Sopimus] Network/CORS error:', networkError);
-            throw new Error('Network error contacting backend');
-        }
-
-        console.log('[Sopimus] Verify response status:', response.status);
+        // Initialize UI directly since Signicat already verified the session
+        console.log('[Sopimus] Token valid; initializing UI');
         
-        let responseBody = null;
-        try {
-            responseBody = await response.json();
-        } catch (jsonError) {
-            console.warn('[Sopimus] Could not parse verify response as JSON:', jsonError);
+        const consentCheckbox = document.getElementById('concent');
+        const proceedButton = document.getElementById('proceedButton');
+        if (consentCheckbox && proceedButton) {
+            consentCheckbox.addEventListener('change', () => {
+                proceedButton.disabled = !consentCheckbox.checked;
+            });
+        } else {
+            console.warn('[Sopimus] Did not find #concent or #proceedButton elements');
         }
-        console.log('[Sopimus] Verify response body:', responseBody);
 
-        if (!response.ok) {
-            const errorMsg = responseBody?.message || responseBody?.error || 'Verification failed';
-            throw new Error(`[Sopimus] Server returned ${response.status}: ${errorMsg}`);
-        }
+    } catch (error) {
+        console.error('[Sopimus] Error:', error);
+        window.location.href = 'index.html';
+    }
+});
 
         // Initialize UI after successful verification
         console.log('[Sopimus] Verification success; initializing UI');
